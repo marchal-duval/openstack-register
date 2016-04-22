@@ -17,53 +17,53 @@ $(function () {
       on the LAL cloud infrastructures.
     </p>
     <p>
-      <strong>Fields marked with an asterisk (*) are mandatory.</strong>
+      <strong>Fields in red are mandatory.</strong>
     </p>
 
-    <form id="form_with_tooltips"
-          action="users/"
-          enctype="application/x-www-form-urlencoded"
-          method="POST">
+    <!--<form id="form_with_tooltips"-->
+          <!--action="users/"-->
+          <!--enctype="application/x-www-form-urlencoded"-->
+          <!--method="POST">-->
 
-      <table>
-        <tbody>
-          <tr>
-            <td>Username (*)</td>
-            <td>
-              <input type="text"
-                     name="uid"
-                     size="40"
-                     maxlength="20"
-                     title="sequence of 3 to 20 letters, digits, or underscores">
-            </td>
-          </tr>
-          <tr>
-            <td>Email Address (*)</td>
-            <td>
-              <input type="text"
-                     name="mail"
-                     size="40"
-                     title="valid email address with domain">
-            </td>
-          </tr>
-          <tr>
-            <td>Given Name(s) (*)</td>
-            <td>
-              <input type="text"
-                     name="givenName"
-                     size="40"
-                     title="your given name(s), cannot be empty">
-            </td>
-          </tr>
-          <tr>
-            <td>Family Name (*)</td>
-            <td>
-              <input type="text"
-                     name="sn"
-                     size="40"
-                     title="your surname, cannot be empty">
-            </td>
-          </tr>
+      <!--<table>-->
+        <!--<tbody>-->
+          <!--<tr>-->
+            <!--<td>Username (*)</td>-->
+            <!--<td>-->
+              <!--<input type="text"-->
+                     <!--name="uid"-->
+                     <!--size="40"-->
+                     <!--maxlength="20"-->
+                     <!--title="sequence of 3 to 20 letters, digits, or underscores">-->
+            <!--</td>-->
+          <!--</tr>-->
+          <!--<tr>-->
+            <!--<td>Email Address (*)</td>-->
+            <!--<td>-->
+              <!--<input type="text"-->
+                     <!--name="mail"-->
+                     <!--size="40"-->
+                     <!--title="valid email address with domain">-->
+            <!--</td>-->
+          <!--</tr>-->
+          <!--<tr>-->
+            <!--<td>Given Name(s) (*)</td>-->
+            <!--<td>-->
+              <!--<input type="text"-->
+                     <!--name="givenName"-->
+                     <!--size="40"-->
+                     <!--title="your given name(s), cannot be empty">-->
+            <!--</td>-->
+          <!--</tr>-->
+          <!--<tr>-->
+            <!--<td>Family Name (*)</td>-->
+            <!--<td>-->
+              <!--<input type="text"-->
+                     <!--name="sn"-->
+                     <!--size="40"-->
+                     <!--title="your surname, cannot be empty">-->
+            <!--</td>-->
+          <!--</tr>-->
           <!--<tr>-->
             <!--<td>X500 DN</td>-->
             <!--<td>-->
@@ -73,53 +73,111 @@ $(function () {
                      <!--title="certificate DN in RFC2253 format">-->
             <!--</td>-->
           <!--</tr>-->
-          <tr>
-            <td>Password (*)</td>
-            <td>
-              <input type="password"
-                     name="newUserPassword"
-                     size="40"
-                     maxlength="20"
-                     title="sequence of 8 to 20 printable characters">
-            </td>
-          </tr>
-          <tr>
-            <td>Password check (*)</td>
-            <td>
-              <input type="password"
-                     name="newUserPasswordCheck"
-                     size="40"
-                     maxlength="20"
-                     title="password double check">
-            </td>
-          </tr>
-          <tr>
-            <td>Message</td>
-            <td>
-              <textarea name="message"
-                        cols="40"
-                        rows="5"
-                        title="tell us why you'd like to use the cloud and how you heard about us">
-              </textarea>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="2">
-              <label>I agree to the defined
-                     <a href="/policies" target="_blank">terms, conditions, and policies</a> (*)
-                <input type="checkbox"
-                       name="agreement"
-                       title="you must agree to create an account">
-              </label>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="2">
-              <input type="submit" value="create">
-            </td>
-          </tr>
-        </tbody>
-      </table>
+          <!--<tr>-->
+            <!--<td>Password (*)</td>-->
+            <!--<td>-->
+              <!--<input type="password"-->
+                     <!--name="newUserPassword"-->
+                     <!--size="40"-->
+                     <!--maxlength="20"-->
+                     <!--title="sequence of 8 to 20 printable characters">-->
+            <!--</td>-->
+          <!--</tr>-->
+          <!--<tr>-->
+            <!--<td>Password check (*)</td>-->
+            <!--<td>-->
+              <!--<input type="password"-->
+                     <!--name="newUserPasswordCheck"-->
+                     <!--size="40"-->
+                     <!--maxlength="20"-->
+                     <!--title="password double check">-->
+            <!--</td>-->
+          <!--</tr>-->
+          <!--<tr>-->
+            <!--<td>Message</td>-->
+            <!--<td>-->
+              <!--<textarea name="message"-->
+                        <!--cols="40"-->
+                        <!--rows="5"-->
+                        <!--title="tell us why you'd like to use the cloud and how you heard about us">-->
+              <!--</textarea>-->
+            <!--</td>-->
+          <!--</tr>-->
+          <!--<tr>-->
+            <!--<td colspan="2">-->
+              <!--<label>I agree to the defined-->
+                     <!--<a href="/policies" target="_blank">terms, conditions, and policies</a> (*)-->
+                <!--<input type="checkbox"-->
+                       <!--name="agreement"-->
+                       <!--title="you must agree to create an account">-->
+              <!--</label>-->
+            <!--</td>-->
+          <!--</tr>-->
+          <!--<tr>-->
+            <!--<td colspan="2">-->
+              <!--<input type="submit" value="create">-->
+            <!--</td>-->
+          <!--</tr>-->
+        <!--</tbody>-->
+      <!--</table>-->
+    <!--</form>-->
+    <form id="form" action="users/" enctype="application/x-www-form-urlencoded" method="POST">
+        <div class="form-group col-sm-10">
+            <label id="usernameLabel" class="control-label col-sm-2" style="color:red">Username: </label>
+            <div id="username" class="col-sm-3">
+                <input id="usernameInput" type="text" value="" class="form-control" placeholder="Username" aria-describedby="basic-addon1">
+            </div>
+            <div class="col-sm-5"></div>
+        </div>
+        <div class="form-group col-sm-10">
+            <label id="emailLabel" class="control-label col-sm-2" style="color:red">Email address: </label>
+            <div id="email" class="col-sm-3">
+                <input id="emailInput" type="text" value="" class="form-control" placeholder="Email address" aria-describedby="basic-addon1">
+            </div>
+            <div class="col-sm-5"></div>
+        </div>
+        <div class="form-group col-sm-10">
+            <label id="firstnameLabel" class="control-label col-sm-2" style="color:red">Firstname: </label>
+            <div id="firstname" class="col-sm-3">
+                <input id="firstnameInput" type="text" value="" class="form-control" placeholder="Firstname" aria-describedby="basic-addon1">
+            </div>
+            <div class="col-sm-5"></div>
+        </div>
+        <div class="form-group col-sm-10">
+            <label id="lastnameLabel" class="control-label col-sm-2" style="color:red">Lastname: </label>
+            <div id="lastname" class="col-sm-3">
+                <input id="lastnameInput" type="text" value="" class="form-control" placeholder="Lastname" aria-describedby="basic-addon1">
+            </div>
+            <div class="col-sm-5"></div>
+        </div>
+        <div class="form-group col-sm-10">
+            <label id="passwordLabel" class="control-label col-sm-2" style="color:red">Password: </label>
+            <div id="password" class="col-sm-3">
+                <input id="passwordInput" type="password" value="" class="form-control" placeholder="Password" aria-describedby="basic-addon1">
+            </div>
+            <div class="col-sm-5"></div>
+        </div>
+        <div class="form-group col-sm-10">
+            <label id="checkPasswordLabel" class="control-label col-sm-2" style="color:red">Check password: </label>
+            <div id="checkPassword" class="col-sm-3">
+                <input id="checkPasswordInput" type="password" value="" class="form-control" placeholder="Retype your password" aria-describedby="basic-addon1">
+            </div>
+            <div class="col-sm-5"></div>
+        </div>
+        <div class="form-group col-sm-10">
+            <label id="messageLabel" class="control-label col-sm-2" style="color:red">Message: </label>
+            <div id="message" class="col-sm-3">
+                <textarea cols="40" rows="5"></textarea>
+            </div>
+            <div class="col-sm-5"></div>
+        </div>
+        <div class="form-group col-sm-10">
+            <label id="agreementLabel" class="control-label col-sm-5">I agree to the defined <a href="/policies" target="_blank">terms, conditions, and policies</a></label>
+            <div id="agreement" class="col-sm-1">
+                <input type="checkbox" name="agreement">
+            </div>
+            <div class="col-sm-5"></div>
+        </div>
     </form>
 </div>
 {% endblock %}
