@@ -3,9 +3,94 @@
 {% block title %}OpenStack - Register{% endblock %}
 
 {% block javascript %}
-$(function () {
-
+$(document).ready( function() {
+    check_empty_fields()
 });
+
+$( function() {
+    hide_see_password();
+});
+
+
+function hide_see_password() {
+    $('#passwordIcon').click( function() {
+        if ( $("#passwordInput").attr('type') == 'password') {
+            $("#passwordInput").attr('type', 'text');
+            $('#passwordIcon').attr('title', 'Hide Password');
+            $('#passwordIcon').attr('class', 'btn btn-primary input-group-addon glyphicon glyphicon-eye-close');
+        }
+        else {
+            $("#passwordInput").attr('type', 'password');
+            $('#passwordIcon').attr('title', 'See Password');
+            $('#passwordIcon').attr('class', 'btn btn-primary input-group-addon glyphicon glyphicon-eye-open');
+        }
+    });
+
+    $('#checkPasswordIcon').click( function() {
+        if ( $("#checkPasswordInput").attr('type') == 'password') {
+            $("#checkPasswordInput").attr('type', 'text');
+            $('#checkPasswordIcon').attr('title', 'Hide Password');
+            $('#checkPasswordIcon').attr('class', 'btn btn-primary input-group-addon glyphicon glyphicon-eye-close');
+        }
+        else {
+            $("#checkPasswordInput").attr('type', 'password');
+            $('#checkPasswordIcon').attr('title', 'See Password');
+            $('#checkPasswordIcon').attr('class', 'btn btn-primary input-group-addon glyphicon glyphicon-eye-open');
+        }
+    });
+}
+
+function check_empty_fields() {
+    $(document).on("keyup click ready", function() {
+        if ($("#usernameInput").val() != '') {
+            $("#usernameInput").attr('style', 'border-color:black;')
+        }
+        else {
+            $("#usernameInput").attr('style', 'border-color:red;')
+        }
+
+        if ($("#emailInput").val() != '') {
+            $("#emailInput").attr('style', 'border-color:black;')
+        }
+        else {
+            $("#emailInput").attr('style', 'border-color:red;')
+        }
+
+        if ($("#firstnameInput").val() != '') {
+            $("#firstnameInput").attr('style', 'border-color:black;')
+        }
+        else {
+            $("#firstnameInput").attr('style', 'border-color:red;')
+        }
+
+        if ($("#lastnameInput").val() != '') {
+            $("#lastnameInput").attr('style', 'border-color:black;')
+        }
+        else {
+            $("#lastnameInput").attr('style', 'border-color:red;')
+        }
+
+        if ($("#passwordInput").val() != '') {
+            $("#passwordInput").attr('style', 'border-color:black;')
+        }
+        else {
+            $("#passwordInput").attr('style', 'border-color:red;')
+        }
+
+        if ($("#checkPasswordInput").val() != '') {
+            $("#checkPasswordInput").attr('style', 'border-color:black;')
+        }
+        else {
+            $("#checkPasswordInput").attr('style', 'border-color:red;')
+        }
+    });
+}
+
+function isValidEmailAddress(emailAddress) {
+    var pattern = /^([a-z\d!#$%&'*+\-\/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+(\.[a-z\d!#$%&'*+\-\/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+)*|"((([ \t]*\r\n)?[ \t]+)?([\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|\\[\x01-\x09\x0b\x0c\x0d-\x7f\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))*(([ \t]*\r\n)?[ \t]+)?")@(([a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|[a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF][a-z\d\-._~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]*[a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])\.)+([a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|[a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF][a-z\d\-._~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]*[a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])\.?$/i;
+    return pattern.test(emailAddress);
+};
+
 {% endblock %}
 
 {% block content %}
@@ -19,6 +104,80 @@ $(function () {
     <p>
       <strong>Fields in red are mandatory.</strong>
     </p>
+
+    <form id="form" action="login" enctype="application/x-www-form-urlencoded" method="POST">
+        <div class="form-group col-sm-10">
+            <label id="usernameLabel" class="control-label col-sm-2">Username: </label>
+            <div id="username" class="col-sm-3">
+                <input style="border-color:red;" id="usernameInput" type="text" value="" class="form-control" placeholder="Username" aria-describedby="basic-addon1">
+            </div>
+            <div class="col-sm-5"></div>
+        </div>
+        <div class="form-group col-sm-10">
+            <label id="emailLabel" class="control-label col-sm-2">Email address: </label>
+            <div id="email" class="col-sm-3">
+                <input style="border-color:red;" id="emailInput" type="text" value="" class="form-control" placeholder="Email address" aria-describedby="basic-addon1">
+            </div>
+            <div class="col-sm-5"></div>
+        </div>
+        <div class="form-group col-sm-10">
+            <label id="firstnameLabel" class="control-label col-sm-2">Firstname: </label>
+            <div id="firstname" class="col-sm-3">
+                <input style="border-color:red;" id="firstnameInput" type="text" value="" class="form-control" placeholder="Firstname" aria-describedby="basic-addon1">
+            </div>
+            <div class="col-sm-5"></div>
+        </div>
+        <div class="form-group col-sm-10">
+            <label id="lastnameLabel" class="control-label col-sm-2">Lastname: </label>
+            <div id="lastname" class="col-sm-3">
+                <input style="border-color:red;" id="lastnameInput" type="text" value="" class="form-control" placeholder="Lastname" aria-describedby="basic-addon1">
+            </div>
+            <div class="col-sm-5"></div>
+        </div>
+        <div class="form-group col-sm-10">
+            <label id="passwordLabel" class="control-label col-sm-2">Password: </label>
+            <div id="password" class="col-sm-3">
+                <div class="input-group">
+                    <input style="border-color:red;" id="passwordInput" type="password" value="" class="form-control" placeholder="Password" aria-describedby="basic-addon1">
+                    <span id="passwordIcon" title="See password" class="btn btn-primary input-group-addon glyphicon glyphicon-eye-open"></span>
+                </div>
+            </div>
+            <div class="col-sm-5"></div>
+        </div>
+        <div class="form-group col-sm-10">
+            <label id="checkPasswordLabel" class="control-label col-sm-2">Check password: </label>
+            <div id="checkPassword" class="col-sm-3">
+                <div class="input-group">
+                    <input style="border-color:red;" id="checkPasswordInput" type="password" value="" class="form-control" placeholder="Retype your password" aria-describedby="basic-addon1">
+                    <span id="checkPasswordIcon" title="See password" class="btn btn-primary input-group-addon glyphicon glyphicon-eye-open"></span>
+                </div>
+            </div>
+            <div class="col-sm-5"></div>
+        </div>
+        <div class="form-group col-sm-10">
+            <label id="messageLabel" class="control-label col-sm-2">Message: </label>
+            <div id="message" class="col-sm-3">
+                <textarea cols="40" rows="5"></textarea>
+            </div>
+            <div class="col-sm-5"></div>
+        </div>
+        <div class="form-group col-sm-10">
+            <label id="agreementLabel" class="control-label col-sm-5">I agree to the defined <a href="/policies" target="_blank">terms, conditions, and policies</a></label>
+            <div id="agreement" class="col-sm-1">
+                <input type="checkbox" name="agreement">
+            </div>
+            <div class="col-sm-5"></div>
+        </div>
+        <div class="col-sm-10">
+            <p id="errorText" align="center" style="color:red"></p>
+            <div class="col-sm-5"></div>
+        </div>
+        <div class="col-sm-10">
+            <input class="btn btn-primary" value="Send" type="submit">
+        </div>
+    </form>
+</div>
+{% endblock %}
 
     <!--<form id="form_with_tooltips"-->
           <!--action="users/"-->
@@ -121,63 +280,3 @@ $(function () {
         <!--</tbody>-->
       <!--</table>-->
     <!--</form>-->
-    <form id="form" action="users/" enctype="application/x-www-form-urlencoded" method="POST">
-        <div class="form-group col-sm-10">
-            <label id="usernameLabel" class="control-label col-sm-2" style="color:red">Username: </label>
-            <div id="username" class="col-sm-3">
-                <input id="usernameInput" type="text" value="" class="form-control" placeholder="Username" aria-describedby="basic-addon1">
-            </div>
-            <div class="col-sm-5"></div>
-        </div>
-        <div class="form-group col-sm-10">
-            <label id="emailLabel" class="control-label col-sm-2" style="color:red">Email address: </label>
-            <div id="email" class="col-sm-3">
-                <input id="emailInput" type="text" value="" class="form-control" placeholder="Email address" aria-describedby="basic-addon1">
-            </div>
-            <div class="col-sm-5"></div>
-        </div>
-        <div class="form-group col-sm-10">
-            <label id="firstnameLabel" class="control-label col-sm-2" style="color:red">Firstname: </label>
-            <div id="firstname" class="col-sm-3">
-                <input id="firstnameInput" type="text" value="" class="form-control" placeholder="Firstname" aria-describedby="basic-addon1">
-            </div>
-            <div class="col-sm-5"></div>
-        </div>
-        <div class="form-group col-sm-10">
-            <label id="lastnameLabel" class="control-label col-sm-2" style="color:red">Lastname: </label>
-            <div id="lastname" class="col-sm-3">
-                <input id="lastnameInput" type="text" value="" class="form-control" placeholder="Lastname" aria-describedby="basic-addon1">
-            </div>
-            <div class="col-sm-5"></div>
-        </div>
-        <div class="form-group col-sm-10">
-            <label id="passwordLabel" class="control-label col-sm-2" style="color:red">Password: </label>
-            <div id="password" class="col-sm-3">
-                <input id="passwordInput" type="password" value="" class="form-control" placeholder="Password" aria-describedby="basic-addon1">
-            </div>
-            <div class="col-sm-5"></div>
-        </div>
-        <div class="form-group col-sm-10">
-            <label id="checkPasswordLabel" class="control-label col-sm-2" style="color:red">Check password: </label>
-            <div id="checkPassword" class="col-sm-3">
-                <input id="checkPasswordInput" type="password" value="" class="form-control" placeholder="Retype your password" aria-describedby="basic-addon1">
-            </div>
-            <div class="col-sm-5"></div>
-        </div>
-        <div class="form-group col-sm-10">
-            <label id="messageLabel" class="control-label col-sm-2" style="color:red">Message: </label>
-            <div id="message" class="col-sm-3">
-                <textarea cols="40" rows="5"></textarea>
-            </div>
-            <div class="col-sm-5"></div>
-        </div>
-        <div class="form-group col-sm-10">
-            <label id="agreementLabel" class="control-label col-sm-5">I agree to the defined <a href="/policies" target="_blank">terms, conditions, and policies</a></label>
-            <div id="agreement" class="col-sm-1">
-                <input type="checkbox" name="agreement">
-            </div>
-            <div class="col-sm-5"></div>
-        </div>
-    </form>
-</div>
-{% endblock %}
