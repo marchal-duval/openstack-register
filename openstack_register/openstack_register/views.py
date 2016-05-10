@@ -5,7 +5,9 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import auth
-from settings import LOGIN_REDIRECT_URL
+from settings import LOGIN_REDIRECT_URL, GLOBAL_CONFIG
+from Backend import OpenLdap
+from utils import *
 
 
 def login(request):

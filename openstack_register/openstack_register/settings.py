@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'openstack_register',
+    'openstack_register'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -122,19 +122,31 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
+LOGIN_URL = 'login'
+LOGOUT_URL = 'logout'
+LOGIN_REDIRECT_URL = '/'
+
 STATIC_URL = '/static/'
 GLOBAL_CONFIG = {}
 config = ConfigParser.RawConfigParser()
 config.read('/etc/register.cfg')
 
-LOGIN_URL = 'login'
-LOGOUT_URL = 'logout'
-LOGIN_REDIRECT_URL = '/'
+GLOBAL_CONFIG['LDAP_SERVER'] = config.get('LDAP', 'server')
+GLOBAL_CONFIG['LDAP_USER'] = config.get('LDAP', 'bind_dn')
+GLOBAL_CONFIG['LDAP_PASSWORD'] = config.get('LDAP', 'password')
+GLOBAL_CONFIG['LDAP_BASE_OU'] = config.get('LDAP', 'user_search')
+
+
+
 
 AUTH_LDAP_SERVER_URI = config.get('AUTH', 'server')
 AUTH_LDAP_BIND_DN = config.get('AUTH', 'bind_dn')
 AUTH_LDAP_BIND_PASSWORD = config.get('AUTH', 'password')
-AUTH_LDAP_USER_SEARCH = LDAPSearch(config.get('AUTH',
+# AUTH_LDAP_USER_SEARCH = LDAPSearch(config.get('AUTH',
+#                                               'user_search'),
+#                                    ldap.SCOPE_SUBTREE,
+#                                    "(samaccountname=%(user)s)")
+DAP_USER_SEARCH = LDAPSearch(config.get('AUTH',
                                               'user_search'),
                                    ldap.SCOPE_SUBTREE,
                                    "(samaccountname=%(user)s)")
