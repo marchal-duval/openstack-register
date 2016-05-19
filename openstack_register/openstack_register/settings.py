@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'openstack_register'
+    'openstack_register',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -146,10 +146,10 @@ AUTH_LDAP_BIND_PASSWORD = config.get('AUTH', 'password')
 #                                               'user_search'),
 #                                    ldap.SCOPE_SUBTREE,
 #                                    "(samaccountname=%(user)s)")
-DAP_USER_SEARCH = LDAPSearch(config.get('AUTH',
+AUTH_LDAP_USER_SEARCH = LDAPSearch(config.get('AUTH',
                                               'user_search'),
                                    ldap.SCOPE_SUBTREE,
-                                   "(samaccountname=%(user)s)")
+                                   "(uid=%(user)s)")
 AUTHENTICATION_BACKENDS = (
     'django_auth_ldap.backend.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',

@@ -21,3 +21,53 @@ def check_password(challenge_password, password):
     hr = hashlib.sha1(password)
     hr.update(salt)
     return digest == hr.digest()
+
+
+def check_password_constraints(password):
+    """
+
+    :param password:
+    :return:
+    """
+    attributes = {}
+    # password = request.GET['password']
+    constraint = {'lower': False,
+                  'upper': False,
+                  'spe': False,
+                  'number': False}
+    index = 0
+    total = 0
+    taille = len(password)
+    spe = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+',
+           '{', '}', '"', ':', ';', '\', ''', '[', ']', '<', '>']
+
+    while index < taille:
+        var = password[index]
+        if var.islower():
+            constraint['lower'] = True
+        if var.isupper():
+            constraint['upper'] = True
+        if var in spe:
+            constraint['spe'] = True
+        if var.isdigit():
+            constraint['number'] = True
+        index += 1
+
+    if constraint['lower']:
+        total += 1
+    if constraint['upper']:
+        total += 1
+    if constraint['spe']:
+        total += 1
+    if constraint['number']:
+        total += 1
+
+    if len(password) < 8:
+        attributes['check'] = 'character'
+    elif total < 3:
+        attributes['check'] = 'require'
+    elif len(password) >= 8 and total >= 3:
+        attributes['check'] = 'success'
+    else:
+        attributes['check'] = 'error'
+    return attributes

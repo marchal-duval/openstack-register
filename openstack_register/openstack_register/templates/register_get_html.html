@@ -3,62 +3,165 @@
 {% block title %}OpenStack - Register{% endblock %}
 
 {% block javascript %}
-$(document).on("keyup click ready", function() {
-    check_empty_fields();
-    hide_send_button();
+
+$(document).ready(function() {
+    clear_form();
 });
 
-$( function() {
-    hide_see_password();
+$(document).on("keyup click ready", function() {
+    check_empty_fields();
+});
 
+$(function() {
+    hide_see_password();
+    hide_send_button_on_diff();
     $('#checkButton').click( function() {
-        if (( $("#usernameInput").val().length < 3 ) || ( $("#usernameInput").val().length > 20 )) {
-            document.getElementById("errorText").innerHTML = "Username have to contains 3 to 20 characters !";
-        }
-        else {
-            if ( isValidEmailAddress($("#emailInput").val()) == 0 ) {
-                document.getElementById("errorText").innerHTML = "Email is not valid !";
-            }
-            else {
-                if ( $("#firstnameInput").val() == '' ) {
-                    document.getElementById("errorText").innerHTML = "Firstname can't be empty !";
-                }
-                else {
-                    if ( $("#lastnameInput").val() == '' ) {
-                        document.getElementById("errorText").innerHTML = "Lastname can't be empty !";
-                    }
-                    else {
-                        if (( $("#passwordInput").val().length < 8 ) || ( $("#checkPasswordInput").val().length < 8)) {
-                            document.getElementById("errorText").innerHTML = "Password have to contains at least 8 characters !";
-                        }
-                        else {
-                            check_similar_password();
-                            if ( document.getElementById("errorText").innerHTML == "" ) {
-                                $("#sendButton").attr('type', 'button');
-                            }
-                        }
-                    }
+        $.ajax({
+            url: check_form(),
+            statusCode: {
+                200: function() {
+                    hide_send_button();
                 }
             }
-        }
+        });
+    });
+
+    $('#sendButton').click( function() {
+        add_user();
     });
 });
 
-function hide_send_button() {
-    if ( document.getElementById("errorText").innerHTML != "") {
+<!--TEST-->
+function return_password() {
+    $.getJSON('/attributes?passwords=' + $('#passwordInput').val(),
+        function (json) {
+            console.log(json.password);
+        }
+    );
+}
+<!--END-->
+
+function add_user() {
+    $.ajaxSetup({
+        beforeSend : function(xhr) {
+            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}" );
+        }
+    });
+    $.ajax({
+        url: '/register?format=json&adduser&password=' + $('#passwordInput').val(),
+        type: 'POST',
+        data: { 'username': $('#usernameInput').val(),
+                'email': $('#emailInput').val(),
+                'firstname': $('#firstnameInput').val(),
+                'lastname': $('#lastnameInput').val(),
+                'password': $('#passwordInput').val()
+        },
+        success: function() {
+        },
+        error: function() {
+        }
+    });
+}
+
+function clear_form() {
+    $("#usernameInput").val('');
+    $("#firstnameInput").val('');
+    $("#lastnameInput").val('');
+    $("#emailInput").val('');
+    $("#passwordInput").val('');
+    $("#checkPasswordInput").val('');
+    checkBoxInput.checked = '';
+}
+
+function hide_send_button_on_diff() {
+    $("input[id*='Input'").on('click keyup', function () {
         $("#sendButton").attr('type', 'hidden');
+        $("#sendButton").attr('disabled');
+    });
+}
+
+function check_form() {
+    if (( $("#usernameInput").val().length < 3 ) || ( $("#usernameInput").val().length > 20 )) {
+        document.getElementById("errorUsername").innerHTML = "Username have to contains 3 to 20 characters !";
     }
-    if ( $("input[style='border-color:red;'").length > 0 ) {
-        $("#sendButton").attr('type', 'hidden');
+    else {
+        isUsernameExist();
+    }
+    if ( isValidEmailAddress($("#emailInput").val()) == 0 ) {
+        document.getElementById("errorEmail").innerHTML = "Email is not valid !";
+    }
+    else {
+        isMailExist();
+    }
+    if ( $("#firstnameInput").val() == '' ) {
+        document.getElementById("errorFirstname").innerHTML = "Firstname can't be empty !";
+    }
+    else {
+        document.getElementById("errorFirstname").innerHTML = '';
+    }
+    if ( $("#lastnameInput").val() == '' ) {
+        document.getElementById("errorLastname").innerHTML = "Lastname can't be empty !";
+    }
+    else {
+        document.getElementById("errorLastname").innerHTML = '';
+    }
+    check_password_constraints();
+    if ( !checkBoxInput.checked ) {
+        document.getElementById("errorText").innerHTML = "You have to read and agree with Terms, Conditions and Policies !";
+    }
+    else {
+        document.getElementById("errorText").innerHTML = '';
     }
 }
 
-function check_similar_password() {
-    if ( $("#passwordInput").val() != $("#checkPasswordInput").val() ) {
-        document.getElementById("errorText").innerHTML = "Password aren't matching !";
+function isUsernameExist() {
+    $.getJSON( "/attributes?format=json", { uid: $('#usernameInput').val() }).done(
+        function (json) {
+            if ( json.status == 'fail' ) {
+                document.getElementById("errorUsername").innerHTML = "Username already in use !";
+            }
+            else {
+                document.getElementById("errorUsername").innerHTML = '';
+            }
+        }
+    );
+}
+
+function isMailExist() {
+    $.getJSON( "/attributes?format=json", { mail: $('#emailInput').val() }).done(
+        function (json) {
+            if ( json.status == 'fail' ) {
+                document.getElementById("errorEmail").innerHTML = "Email already in use !";
+            }
+            else {
+                document.getElementById("errorEmail").innerHTML = '';
+            }
+        }
+    );
+}
+
+function hide_send_button() {
+    values = [];
+    tmp = '';
+    $.each($("p[id*='error'"), function (index, value) {
+        values.push(value.id);
+    });
+
+    $.each(values, function (index, value) {
+        tmp = tmp + document.getElementById(value).innerHTML;
+    });
+
+    if ( tmp != '' ) {
+        $("#sendButton").attr('type', 'hidden');
+        $("#sendButton").attr('disabled', '');
+    }
+    else if ( $("input[style='border-color:red;'").length > 0 ) {
+        $("#sendButton").attr('type', 'hidden');
+        $("#sendButton").attr('disabled', '');
     }
     else {
-        document.getElementById("errorText").innerHTML = "";
+        $("#sendButton").attr('type', 'button');
+        $("#sendButton").removeAttr('disabled');
     }
 }
 
@@ -88,6 +191,32 @@ function hide_see_password() {
             $('#checkPasswordIcon').attr('class', 'btn btn-primary input-group-addon glyphicon glyphicon-eye-open');
         }
     });
+}
+
+function check_password_constraints() {
+    $.getJSON( "/attributes?format=json", { password: $('#passwordInput').val() }).done(
+        function(json) {
+            if ( json.check == 'character' ) {
+               document.getElementById("errorPassword").innerHTML = "Password have to contains at least 8 characters !";
+            }
+            else if ( json.check == 'require' ) {
+                document.getElementById("errorPassword").innerHTML = "Password have to contains lowercase, uppercase, digit, special (at least 3/4) !";
+            }
+            else if ( json.check == 'success' ) {
+                document.getElementById("errorPassword").innerHTML = '';
+            }
+            else {
+                document.getElementById("errorPassword").innerHTML = "Error";
+            }
+        }
+    );
+
+    if ( $("#passwordInput").val() != $("#checkPasswordInput").val() ) {
+            document.getElementById("errorCheckPassword").innerHTML = "Password aren't matching !";
+    }
+    else {
+        document.getElementById("errorCheckPassword").innerHTML = '';
+    }
 }
 
 function check_empty_fields() {
@@ -160,28 +289,36 @@ function isValidEmailAddress(emailAddress) {
             <div id="username" class="col-sm-3">
                 <input style="border-color:red;" id="usernameInput" type="text" value="" class="form-control" placeholder="Username" aria-describedby="basic-addon1">
             </div>
-            <div class="col-sm-5"></div>
+            <div class="col-sm-5">
+                <p id="errorUsername" style="color:red"></p>
+            </div>
         </div>
         <div class="form-group col-sm-10">
             <label id="emailLabel" class="control-label col-sm-2">Email address: </label>
             <div id="email" class="col-sm-3">
                 <input style="border-color:red;" id="emailInput" type="text" value="" class="form-control" placeholder="Email address" aria-describedby="basic-addon1">
             </div>
-            <div class="col-sm-5"></div>
+            <div class="col-sm-5">
+                <p id="errorEmail" style="color:red"></p>
+            </div>
         </div>
         <div class="form-group col-sm-10">
             <label id="firstnameLabel" class="control-label col-sm-2">Firstname: </label>
             <div id="firstname" class="col-sm-3">
                 <input style="border-color:red;" id="firstnameInput" type="text" value="" class="form-control" placeholder="Firstname" aria-describedby="basic-addon1">
             </div>
-            <div class="col-sm-5"></div>
+            <div class="col-sm-5">
+                <p id="errorFirstname" style="color:red"></p>
+            </div>
         </div>
         <div class="form-group col-sm-10">
             <label id="lastnameLabel" class="control-label col-sm-2">Lastname: </label>
             <div id="lastname" class="col-sm-3">
                 <input style="border-color:red;" id="lastnameInput" type="text" value="" class="form-control" placeholder="Lastname" aria-describedby="basic-addon1">
             </div>
-            <div class="col-sm-5"></div>
+            <div class="col-sm-5">
+                <p id="errorLastname" style="color:red"></p>
+            </div>
         </div>
         <div class="form-group col-sm-10">
             <label id="passwordLabel" class="control-label col-sm-2">Password: </label>
@@ -191,7 +328,9 @@ function isValidEmailAddress(emailAddress) {
                     <span id="passwordIcon" title="See password" class="btn btn-primary input-group-addon glyphicon glyphicon-eye-open"></span>
                 </div>
             </div>
-            <div class="col-sm-5"></div>
+            <div class="col-sm-5">
+                <p id="errorPassword" style="color:red"></p>
+            </div>
         </div>
         <div class="form-group col-sm-10">
             <label id="checkPasswordLabel" class="control-label col-sm-2">Retype password: </label>
@@ -201,19 +340,21 @@ function isValidEmailAddress(emailAddress) {
                     <span id="checkPasswordIcon" title="See password" class="btn btn-primary input-group-addon glyphicon glyphicon-eye-open"></span>
                 </div>
             </div>
-            <div class="col-sm-5"></div>
-        </div>
-        <div class="form-group col-sm-10">
-            <label id="messageLabel" class="control-label col-sm-2">Message: </label>
-            <div id="message" class="col-sm-3">
-                <textarea cols="40" rows="5"></textarea>
+            <div class="col-sm-5">
+                <p id="errorCheckPassword" style="color:red"></p>
             </div>
-            <div class="col-sm-5"></div>
         </div>
+        <!--<div class="form-group col-sm-10">-->
+            <!--<label id="messageLabel" class="control-label col-sm-2">Message: </label>-->
+            <!--<div id="message" class="col-sm-3">-->
+                <!--<textarea cols="40" rows="5"></textarea>-->
+            <!--</div>-->
+            <!--<div class="col-sm-5"></div>-->
+        <!--</div>-->
         <div class="form-group col-sm-10">
-            <label id="agreementLabel" class="control-label col-sm-5">I agree to the defined <a href="/policies" target="_blank">terms, conditions, and policies</a></label>
+            <label id="agreementLabel" class="control-label col-sm-6" style="font-size: 17px;">I have read and agree to the <a href="/policies" target="_blank"><u>Terms, Conditions & Policies</u></a></label>
             <div id="agreement" class="col-sm-1">
-                <input type="checkbox" name="agreement">
+                <input id="checkBoxInput" type="checkbox" name="agreement" style="">
             </div>
             <div class="col-sm-5"></div>
         </div>
@@ -226,7 +367,7 @@ function isValidEmailAddress(emailAddress) {
         <div class="col-sm-10">
             <input class="btn btn-primary col-sm-2" id="checkButton" value="Check Form" type="button">
             <div class="col-sm-3"></div>
-            <input class="btn btn-primary col-sm-1" type="hidden" id="sendButton" value="Send">
+            <input class="btn btn-primary col-sm-1" type="hidden" id="sendButton" value="Send" disabled="">
         </div>
     </form>
 </div>
