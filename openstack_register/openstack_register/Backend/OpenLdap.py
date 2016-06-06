@@ -45,7 +45,8 @@ class OpenLdap(object):
             'givenName': firstname,
             'sn': lastname,
             'cn': "{} {}".format(firstname, lastname),
-            'userPassword': str(password)
+            'userPassword': str(password),
+            'pager': '514'
         }
 
         for value in attrs:

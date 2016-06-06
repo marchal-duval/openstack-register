@@ -48,7 +48,8 @@ function add_user() {
         }
     });
     $.ajax({
-        url: '/register?format=json&adduser&password=' + $('#passwordInput').val(),
+        <!--url: '/register?format=json&adduser&password=' + $('#passwordInput').val(),-->
+        url: '/register?format=json&adduser',
         type: 'POST',
         data: { 'username': $('#usernameInput').val(),
                 'email': $('#emailInput').val(),
@@ -57,6 +58,7 @@ function add_user() {
                 'password': $('#passwordInput').val()
         },
         success: function() {
+            clear_form();
         },
         error: function() {
         }
@@ -122,6 +124,11 @@ function isUsernameExist() {
             }
             else {
                 document.getElementById("errorUsername").innerHTML = '';
+            }
+            $('#usernameInput').val(json.uid);
+            check_empty_fields();
+            if (( $("#usernameInput").val().length < 3 ) || ( $("#usernameInput").val().length > 20 )) {
+                document.getElementById("errorUsername").innerHTML = "Username have to contains 3 to 20 characters !";
             }
         }
     );

@@ -51,8 +51,8 @@ def register_dispatcher(request):
     if 'format' in request.GET:
         if 'adduser' in request.GET:
             attributes = QueryDict(request.body).dict()
-            print type(attributes['password'])
-            print attributes['password']
+            # print type(attributes['password'])
+            # print attributes['password']
             add_user(request, attributes)
             return JsonResponse(attributes)
     else:
@@ -79,8 +79,9 @@ def attributes_dispatcher(request):
 
     elif 'uid' in request.GET:
         ldap = OpenLdap(GLOBAL_CONFIG)
-        uid = request.GET['uid']
+        uid = normalize_string(request.GET['uid'])
         checked = ldap.search_user(uid=uid)
+        attributes['uid'] = uid
 
         if checked:
             attributes['status'] = 'fail'
@@ -107,9 +108,7 @@ def add_user(request,
     email = str(attributes['email'])
     firstname = str(attributes['firstname'])
     lastname = str(attributes['lastname'])
-    # tmp_passwd = str(attributes['password'])
-    # password = encode_password(tmp_passwd)
-    password = encode_password(request.GET['password'])
-    print type(password)
-    print password
+    password = encode_password(attributes['password'])
+
     ldap.add_user(username, email, firstname, lastname, password)
+    send_mail(username,email,'')
