@@ -11,6 +11,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import uuid
+from models import UserActivation
 
 
 def encode_password(password):
@@ -92,7 +93,8 @@ def normalize_string(string):
 
 def send_mail(username,
               user_email,
-              admin_mail):
+              admin_mail,
+              action):
     """
 
     :param username:
@@ -100,21 +102,36 @@ def send_mail(username,
     :param admin_mail:
     :return:
     """
+    message = ''
     header = MIMEMultipart()
     header['From'] = 'no-reply@openstack.lal.in2p3.fr'
     header['To'] = user_email
     header['Subject'] = 'OpenStack Registration Message'
 
-    random_string = uuid.uuid4()
-    link = "http://134.158.76.228:8000/action/{}".format(random_string)
+    if action == 'add':
+        random_string = uuid.uuid4()
+        link = "http://134.158.76.228:8000/action/{}".format(random_string)
 
-    message = "Dear {}, \n\nYou just create an account on OpenStack@lal.\n" \
-              "Please follow the ling to activate your account: \n{}" \
-              "\n\nDon't reply at this email.".format(username,
-                                                      link)
+        message = "Dear {}, \n\nYou just create an account on OpenStack@lal.\n" \
+                  "Please follow the ling to activate your account: \n{}" \
+                  "\n\nDon't reply at this email.".format(username,
+                                                          link)
+        add_entry_database(random_string, username)
+
+    elif action == 'enable':
+        message = "Dear {}, \n\nYour account have been enabled." \
+                  "\n\nDon't reply at this email.".format(username)
+
     header.attach(MIMEText(message))
     mail_server = smtplib.SMTP('smtp.lal.in2p3.fr', 25)
     mail_server.sendmail('root', 'marchal@lal.in2p3.fr',
                          header.as_string())
     # replace marchal@.. by user_email
     mail_server.quit()
+
+
+
+def add_entry_database(random_string,
+                       user):
+    new_user = UserActivation(link=random_string, username=user)
+    new_user.save()

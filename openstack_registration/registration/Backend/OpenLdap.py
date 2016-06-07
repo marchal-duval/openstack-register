@@ -3,6 +3,7 @@
 
 import ldap
 import ldap.sasl
+from registration.models import UserActivation
 
 
 class OpenLdap(object):
@@ -60,7 +61,8 @@ class OpenLdap(object):
 
     def search_user(self,
                     uid=None,
-                    mail=None):
+                    mail=None,
+                    attributes=None):
         if uid is not None:
             return self.connection.search_s(self.base_ou,
                                             ldap.SCOPE_SUBTREE,
@@ -74,3 +76,28 @@ class OpenLdap(object):
                                             "(&(objectClass=person)(mail={}))"
                                             .format(mail),
                                             ['mail'])
+        if attributes is not None:
+            return self.connection.search_s(self.base_ou,
+                                            ldap.SCOPE_SUBTREE,
+                                            "(&(objectClass=person)(uid={}))"
+                                            .format(attributes))
+
+    def enable_user(self,
+                    uuid):
+        attrs = {}
+        user = UserActivation.objects.filter(link=uuid)
+
+        if user:
+            username = user[0].username
+            user_attributes = self.search_user(attributes=username)
+            dn_user = str(user_attributes[0][0])
+            email = str(user_attributes[0][1]['mail'][0])
+            update_attrs = [(ldap.MOD_REPLACE, 'pager', '512')]
+            attrs['mail'] = email
+            attrs['username'] = username
+
+            self.connection.modify_s(dn_user, update_attrs)
+            user.delete()
+
+        return attrs
+

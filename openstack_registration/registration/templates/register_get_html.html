@@ -31,16 +31,6 @@ $(function() {
     });
 });
 
-<!--TEST-->
-function return_password() {
-    $.getJSON('/attributes?passwords=' + $('#passwordInput').val(),
-        function (json) {
-            console.log(json.password);
-        }
-    );
-}
-<!--END-->
-
 function add_user() {
     $.ajaxSetup({
         beforeSend : function(xhr) {
@@ -290,7 +280,7 @@ function isValidEmailAddress(emailAddress) {
     </p>
 
     <!--<form id="form" action="register" enctype="application/x-www-form-urlencoded" method="POST">{% csrf_token %}-->
-    <form id="form">
+    <form id="form">{% csrf_token %}
         <div class="form-group col-sm-10">
             <label id="usernameLabel" class="control-label col-sm-2">Username: </label>
             <div id="username" class="col-sm-3">

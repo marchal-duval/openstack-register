@@ -24,4 +24,5 @@ urlpatterns = [
     url(r'^login', views.login),
     url(r'^register', views.register_dispatcher),
     url(r'^attributes$', views.attributes_dispatcher),
+    url(r'^action/', views.activate_user),
 ]

@@ -111,4 +111,16 @@ def add_user(request,
     password = encode_password(attributes['password'])
 
     ldap.add_user(username, email, firstname, lastname, password)
-    send_mail(username,email,'')
+    send_mail(username,email,'', 'add')
+
+def activate_user(request):
+    uuid = request.path.split('/action/')
+    uuid.pop(0)
+    uuid = str(uuid[0])
+    ldap = OpenLdap(GLOBAL_CONFIG)
+    try :
+        attrs = ldap.enable_user(uuid)
+        send_mail(attrs['username'], attrs['mail'], '', 'enable')
+    except:
+        exit(1)
+    return render(request, 'home_get_html.html')
