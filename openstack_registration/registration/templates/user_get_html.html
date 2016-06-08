@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}OpenStack - User{% endblock %}
+
+{% block javascript %}
+$(document).ready(function() {
+    get_attributes();
+});
+
+function get_attributes() {
+    $.getJSON('/users/gerarde', { format: 'json' }).done(
+        function (json) {
+            console.log(json);
+        }
+    );
+}
+
+{% endblock %}
+
+{% block content %}
+
+
+{% endblock %}
