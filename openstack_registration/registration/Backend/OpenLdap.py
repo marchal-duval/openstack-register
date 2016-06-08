@@ -70,13 +70,13 @@ class OpenLdap(object):
                                             .format(uid),
                                             ['uid'])
 
-        if mail is not None:
+        elif mail is not None:
             return self.connection.search_s(self.base_ou,
                                             ldap.SCOPE_SUBTREE,
                                             "(&(objectClass=person)(mail={}))"
                                             .format(mail),
                                             ['mail'])
-        if attributes is not None:
+        elif attributes is not None:
             return self.connection.search_s(self.base_ou,
                                             ldap.SCOPE_SUBTREE,
                                             "(&(objectClass=person)(uid={}))"

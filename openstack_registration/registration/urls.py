@@ -25,4 +25,5 @@ urlpatterns = [
     url(r'^register', views.register_dispatcher),
     url(r'^attributes$', views.attributes_dispatcher),
     url(r'^action/', views.activate_user),
+    url(r'^users/(?P<username>[\w]+)$', views.user_dispatcher),
 ]
