@@ -80,7 +80,8 @@ class OpenLdap(object):
             return self.connection.search_s(self.base_ou,
                                             ldap.SCOPE_SUBTREE,
                                             "(&(objectClass=person)(uid={}))"
-                                            .format(attributes))
+                                            .format(attributes),
+                                            ['uid', 'mail', 'givenName', 'sn'])
 
     def enable_user(self,
                     uuid):
@@ -100,4 +101,3 @@ class OpenLdap(object):
             user.delete()
 
         return attrs
-

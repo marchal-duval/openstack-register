@@ -16,14 +16,17 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from registration import views
+from django.views.generic.base import RedirectView
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', views.home_get_html),
     url(r'^policies', views.policies_get_html),
     url(r'^login', views.login),
+    url(r'^logout', views.logout),
     url(r'^register', views.register_dispatcher),
-    url(r'^attributes$', views.attributes_dispatcher),
-    url(r'^action/', views.activate_user),
-    url(r'^users/(?P<username>[\w]+)$', views.user_dispatcher),
+    url(r'^attributes', views.attributes_dispatcher),
+    url(r'^action', views.activate_user),
+    url(r'^users/[\w]+$', views.user_dispatcher),
+    url(r'^users/$', RedirectView.as_view(url='/users/connected', permanent=False))
 ]

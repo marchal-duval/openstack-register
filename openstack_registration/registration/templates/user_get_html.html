@@ -8,9 +8,12 @@ $(document).ready(function() {
 });
 
 function get_attributes() {
-    $.getJSON('/users/gerarde', { format: 'json' }).done(
+    $.getJSON(location.pathname, { format: 'json' }).done(
         function (json) {
-            console.log(json);
+            $('#usernameInput').val(json.attrs.uid);
+            $('#emailInput').val(json.attrs.mail);
+            $('#firstnameInput').val(json.attrs.givenName);
+            $('#lastnameInput').val(json.attrs.sn);
         }
     );
 }
@@ -18,6 +21,63 @@ function get_attributes() {
 {% endblock %}
 
 {% block content %}
+<div>
+    <h2>User profile</h2>
 
+    <p>
+      Here you can check your profile and change your password.
+    </p>
 
+    <form id="form">{% csrf_token %}
+        <div class="form-group col-sm-10">
+            <label id="usernameLabel" class="control-label col-sm-2">Username: </label>
+            <div id="username" class="col-sm-3">
+                <input id="usernameInput" type="text" value="" class="form-control" placeholder="Username" aria-describedby="basic-addon1" disabled>
+            </div>
+            <!--<div class="col-sm-5">-->
+                <!--<p id="errorUsername" style="color:red"></p>-->
+            <!--</div>-->
+        </div>
+        <div class="form-group col-sm-10">
+            <label id="emailLabel" class="control-label col-sm-2">Email address: </label>
+            <div id="email" class="col-sm-3">
+                <input id="emailInput" type="text" value="" class="form-control" placeholder="Email address" aria-describedby="basic-addon1" disabled>
+            </div>
+            <!--<div class="col-sm-5">-->
+                <!--<p id="errorEmail" style="color:red"></p>-->
+            <!--</div>-->
+        </div>
+        <div class="form-group col-sm-10">
+            <label id="firstnameLabel" class="control-label col-sm-2">Firstname: </label>
+            <div id="firstname" class="col-sm-3">
+                <input id="firstnameInput" type="text" value="" class="form-control" placeholder="Firstname" aria-describedby="basic-addon1" disabled>
+            </div>
+            <!--<div class="col-sm-5">-->
+                <!--<p id="errorFirstname" style="color:red"></p>-->
+            <!--</div>-->
+        </div>
+        <div class="form-group col-sm-10">
+            <label id="lastnameLabel" class="control-label col-sm-2">Lastname: </label>
+            <div id="lastname" class="col-sm-3">
+                <input id="lastnameInput" type="text" value="" class="form-control" placeholder="Lastname" aria-describedby="basic-addon1" disabled>
+            </div>
+            <!--<div class="col-sm-5">-->
+                <!--<p id="errorLastname" style="color:red"></p>-->
+            <!--</div>-->
+        </div>
+    </form>
+</div>
+
+{% endblock %}
+
+{% block logout %}
+<!--<a href="/logout">-->
+    <!--<span class="glyphicon glyphicon-log-out"></span>-->
+<!--</a>-->
+{% endblock %}
+
+{% block login %}
+<!--<li>-->
+    <!--<a href="/users/connected">My account</a>-->
+<!--</li>-->
 {% endblock %}

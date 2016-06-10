@@ -21,7 +21,7 @@ def login(request):
         user = auth.authenticate(username=request.POST['username'].lower(),
                                  password=request.POST['password'])
         if user is not None:
-            redirect_page = "users/{}".format(request.POST['username'].lower())
+            redirect_page = "/users/{}".format(request.POST['username'].lower())
             auth.login(request, user)
             return HttpResponseRedirect(redirect_page)
         else:
@@ -30,16 +30,31 @@ def login(request):
         return render(request, "login.html")
 
 
+def logout(request):
+    """
+    Logout user and redirect to login page
+
+    :param request: HTTP request
+    :return: HTTP
+    """
+    auth.logout(request)
+    return redirect('/')
+
+
 @login_required()
-def user_dispatcher(request,
-                    username):
-    if request.method == 'GET'\
-            and 'format' in request.GET\
-            and request.GET['format'] == 'json':
-        return user_get_json(request,
-                             username)
-    elif request.method == 'GET':
-        return render(request, 'user_get_html.html')
+def user_dispatcher(request):
+    uri = request.path
+    url_user = "/users/{}".format(request.user)
+
+    if uri != url_user:
+        return HttpResponseRedirect(url_user)
+    else:
+        if request.method == 'GET'\
+                and 'format' in request.GET\
+                and request.GET['format'] == 'json':
+            return user_get_json(request)
+        elif request.method == 'GET':
+            return render(request, 'user_get_html.html')
 
 
 @login_required()
@@ -48,16 +63,17 @@ def user_get_html(request):
 
 
 @login_required()
-def user_get_json(request,
-                  username):
+def user_get_json(request):
     data = {}
     ldap = OpenLdap(GLOBAL_CONFIG)
-    attrs = ldap.search_user(attributes=username)
-    print attrs
+    attrs = ldap.search_user(attributes=request.user)
+    data['attrs'] = {}
+
     # attrs = attrs[0][1]
     for key, value in attrs:
         for each in value:
-            data[each] = value[each]
+            data['attrs'][each] = value[each]
+
     return JsonResponse(data)
 
 
@@ -83,8 +99,6 @@ def register_dispatcher(request):
     if 'format' in request.GET:
         if 'adduser' in request.GET:
             attributes = QueryDict(request.body).dict()
-            # print type(attributes['password'])
-            # print attributes['password']
             add_user(request, attributes)
             return JsonResponse(attributes)
     else:

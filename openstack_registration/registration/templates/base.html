@@ -36,6 +36,7 @@
                          </li>
                      </ul>
                      <ul class="nav navbar-nav navbar-right">
+                         {% block login %} {% endblock %}
                          <li class="dropdown">
                              <a href="#"
                                 class="dropdown-toggle"
@@ -52,6 +53,12 @@
                                     </li>
                                 </ul>
                              </a>
+                         </li>
+                         <li>
+                             {% block logout %} {% endblock %}
+                             <a href="/logout">
+                                <span class="glyphicon glyphicon-log-out"></span>
+                            </a>
                          </li>
                      </ul>
                  </div>
