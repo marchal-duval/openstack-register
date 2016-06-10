@@ -107,7 +107,7 @@ function check_form() {
 }
 
 function isUsernameExist() {
-    $.getJSON( "/attributes?format=json", { uid: $('#usernameInput').val() }).done(
+    $.getJSON( "/attributes/?format=json", { uid: $('#usernameInput').val() }).done(
         function (json) {
             if ( json.status == 'fail' ) {
                 document.getElementById("errorUsername").innerHTML = "Username already in use !";
@@ -125,7 +125,7 @@ function isUsernameExist() {
 }
 
 function isMailExist() {
-    $.getJSON( "/attributes?format=json", { mail: $('#emailInput').val() }).done(
+    $.getJSON( "/attributes/?format=json", { mail: $('#emailInput').val() }).done(
         function (json) {
             if ( json.status == 'fail' ) {
                 document.getElementById("errorEmail").innerHTML = "Email already in use !";
@@ -191,7 +191,7 @@ function hide_see_password() {
 }
 
 function check_password_constraints() {
-    $.getJSON( "/attributes?format=json", { password: $('#passwordInput').val() }).done(
+    $.getJSON( "/attributes/?format=json", { password: $('#passwordInput').val() }).done(
         function(json) {
             if ( json.check == 'character' ) {
                document.getElementById("errorPassword").innerHTML = "Password have to contains at least 8 characters !";

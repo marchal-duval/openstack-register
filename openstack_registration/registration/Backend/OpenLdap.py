@@ -81,7 +81,7 @@ class OpenLdap(object):
                                             ldap.SCOPE_SUBTREE,
                                             "(&(objectClass=person)(uid={}))"
                                             .format(attributes),
-                                            ['uid', 'mail', 'givenName', 'sn'])
+                                            ['uid', 'mail', 'givenName', 'sn', 'cn'])
 
     def enable_user(self,
                     uuid):
@@ -93,9 +93,13 @@ class OpenLdap(object):
             user_attributes = self.search_user(attributes=username)
             dn_user = str(user_attributes[0][0])
             email = str(user_attributes[0][1]['mail'][0])
+            firstname = str(user_attributes[0][1]['givenName'][0])
+            lastname = str(user_attributes[0][1]['sn'][0])
             update_attrs = [(ldap.MOD_REPLACE, 'pager', '512')]
             attrs['mail'] = email
             attrs['username'] = username
+            attrs['firstname'] = firstname
+            attrs['lastname'] = lastname
 
             self.connection.modify_s(dn_user, update_attrs)
             user.delete()

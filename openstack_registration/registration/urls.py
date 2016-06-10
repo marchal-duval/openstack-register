@@ -27,6 +27,7 @@ urlpatterns = [
     url(r'^register', views.register_dispatcher),
     url(r'^attributes', views.attributes_dispatcher),
     url(r'^action', views.activate_user),
+    url(r'^logged', views.user_is_authenticate),
     url(r'^users/[\w]+$', views.user_dispatcher),
     url(r'^users/$', RedirectView.as_view(url='/users/connected', permanent=False))
 ]

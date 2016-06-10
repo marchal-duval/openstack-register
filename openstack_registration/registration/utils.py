@@ -135,6 +135,8 @@ def normalize_string(string):
 
 
 def send_mail(username,
+              firstname,
+              lastname,
               user_email,
               admin_mail,
               action):
@@ -155,15 +157,20 @@ def send_mail(username,
         random_string = uuid.uuid4()
         link = "http://134.158.76.228:8000/action/{}".format(random_string)
 
-        message = "Dear {}, \n\nYou just create an account on OpenStack@lal.\n" \
+        message = "Dear {} {}, \n\nYou just create an account on OpenStack@lal.\n" \
                   "Please follow the ling to activate your account: \n{}" \
-                  "\n\nDon't reply at this email.".format(username,
+                  "\n\nDon't reply at this email.".format(firstname,
+                                                          lastname,
                                                           link)
         add_entry_database(random_string, username)
 
     elif action == 'enable':
-        message = "Dear {}, \n\nYour account have been enabled." \
-                  "\n\nDon't reply at this email.".format(username)
+        message = "Dear {} {}, \n\nYour account have been enabled.\n" \
+                  "You can now login on http://134.158.76.228:8000/login " \
+                  "with your username '{}'." \
+                  "\n\nDon't reply at this email.".format(firstname,
+                                                          lastname,
+                                                          username)
 
     header.attach(MIMEText(message))
     mail_server = smtplib.SMTP('smtp.lal.in2p3.fr', 25)

@@ -5,9 +5,17 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse, HttpResponseRedirect, QueryDict
 from django.contrib.auth.decorators import login_required
 from django.contrib import auth
-from openstack_registration.settings import LOGIN_REDIRECT_URL, GLOBAL_CONFIG
+from openstack_registration.settings import GLOBAL_CONFIG
 from Backend import OpenLdap
 from utils import *
+
+
+def user_is_authenticate(request):
+    data = {}
+    data['status'] = 'False'
+    if request.user.is_authenticated():
+        data['status'] = 'True'
+    return JsonResponse(data)
 
 
 def login(request):
@@ -16,18 +24,21 @@ def login(request):
     :param request:
     :return:
     """
-
-    if request.method == "POST":
-        user = auth.authenticate(username=request.POST['username'].lower(),
-                                 password=request.POST['password'])
-        if user is not None:
-            redirect_page = "/users/{}".format(request.POST['username'].lower())
-            auth.login(request, user)
-            return HttpResponseRedirect(redirect_page)
+    if request.user.is_authenticated():
+        redirect_page = "/users/{}".format(request.user)
+        return redirect(redirect_page)
+    else:
+        if request.method == "POST":
+            user = auth.authenticate(username=request.POST['username'].lower(),
+                                     password=request.POST['password'])
+            if user is not None:
+                redirect_page = "/users/{}".format(request.POST['username'].lower())
+                auth.login(request, user)
+                return HttpResponseRedirect(redirect_page)
+            else:
+                return render(request, "login.html")
         else:
             return render(request, "login.html")
-    else:
-        return render(request, "login.html")
 
 
 def logout(request):
@@ -157,7 +168,8 @@ def add_user(request,
     password = encode_password(attributes['password'])
 
     ldap.add_user(username, email, firstname, lastname, password)
-    send_mail(username,email,'', 'add')
+    send_mail(username, firstname, lastname, email, '', 'add')
+
 
 def activate_user(request):
     uuid = request.path.split('/action/')
@@ -165,9 +177,10 @@ def activate_user(request):
     uuid = str(uuid[0])
     ldap = OpenLdap(GLOBAL_CONFIG)
     info = {}
-    try :
+    try:
         attrs = ldap.enable_user(uuid)
-        send_mail(attrs['username'], attrs['mail'], '', 'enable')
+        send_mail(attrs['username'], attrs['firstname'], attrs['lastname'],
+                  attrs['mail'], '', 'enable')
     except:
         info['info'] = 'Your account is already enable or the url is not ' \
                           'valid, please check your mailbox.'
