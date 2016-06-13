@@ -15,6 +15,7 @@ def user_is_authenticate(request):
     data['status'] = 'False'
     if request.user.is_authenticated():
         data['status'] = 'True'
+        data['user'] = str(request.user)
     return JsonResponse(data)
 
 
