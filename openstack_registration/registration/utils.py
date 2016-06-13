@@ -5,8 +5,8 @@ import os
 import hashlib
 import unicodedata
 import re
-from base64 import urlsafe_b64encode as encode
-from base64 import urlsafe_b64decode as decode
+# from base64 import urlsafe_b64encode as encode
+# from base64 import urlsafe_b64decode as decode
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -123,15 +123,23 @@ def check_password_constraints(password):
     return attributes
 
 
-def normalize_string(string):
+def normalize_string(string,
+                     option=None):
     """
 
     :param string:
+    :param option:
     :return:
     """
-    return re.sub('_', '',
-                  re.sub(r'[\W, 0-9]', '',
-                         unicodedata.normalize('NFKD', string).encode('ASCII', 'ignore').lower()))
+    if option is None or option == 'username':
+        return re.sub(r'[\W_]', '',
+                      unicodedata.normalize('NFKD', string)
+                      .encode('ASCII', 'ignore').lower())
+    elif option == 'name':
+        return re.sub(r'[\s]', '-',
+                      re.sub(r'[^a-zA-Z, -]', '',
+                             unicodedata.normalize('NFKD', string)
+                             .encode('ASCII', 'ignore').lower()))
 
 
 def send_mail(username,
@@ -143,8 +151,11 @@ def send_mail(username,
     """
 
     :param username:
+    :param firstname:
+    :param lastname:
     :param user_email:
     :param admin_mail:
+    :param action:
     :return:
     """
     message = ''
@@ -174,11 +185,10 @@ def send_mail(username,
 
     header.attach(MIMEText(message))
     mail_server = smtplib.SMTP('smtp.lal.in2p3.fr', 25)
-    mail_server.sendmail('root', 'marchal@lal.in2p3.fr',
+    mail_server.sendmail('root', user_email,
                          header.as_string())
     # replace marchal@.. by user_email
     mail_server.quit()
-
 
 
 def add_entry_database(random_string,

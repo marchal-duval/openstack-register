@@ -124,6 +124,36 @@ def attributes_dispatcher(request):
         attributes = check_password_constraints(password)
         return JsonResponse(attributes)
 
+    if 'checkPassword' in request.GET:
+        ldap = OpenLdap(GLOBAL_CONFIG)
+        password = unicode(request.GET['checkPassword']).encode(encoding='utf-8')
+        uid = str(request.user)
+        userPassword = ldap.search_user(password=uid)
+
+        userPassword = userPassword[0][1]['userPassword'][0]
+        checked = check_password(userPassword, password)
+
+        if checked:
+            attributes['status'] = 'success'
+        else:
+            attributes['status'] = 'fail'
+        return JsonResponse(attributes)
+
+    if 'changePassword' in request.GET:
+        info = {}
+        attributes = QueryDict(request.body).dict()
+        ldap = OpenLdap(GLOBAL_CONFIG)
+        uid = str(request.user)
+        password = encode_password(unicode(attributes['changePassword'])
+                                   .encode(encoding='utf-8'))
+        try:
+            attrs = ldap.change_user_password(uid, password)
+            return JsonResponse(attrs)
+        except:
+            info['info'] = 'Fail to change your password.'
+            return render(request, 'error_get_html.html', context=info)
+        # return render(request, 'home_get_html.html')
+
     ### TEST ###
     elif 'passwords' in request.GET:
         password = request.GET['passwords']
@@ -132,7 +162,8 @@ def attributes_dispatcher(request):
         print password
         print type(attributes['password'])
         print attributes['password']
-        return JsonResponse(attributes)
+        # return JsonResponse(attributes)
+        return render(request, 'users_get_html.html')
     ### END ###
 
     elif 'uid' in request.GET:
@@ -145,6 +176,13 @@ def attributes_dispatcher(request):
             attributes['status'] = 'fail'
         else:
             attributes['status'] = 'success'
+        return JsonResponse(attributes)
+
+    elif 'firstname' in request.GET:
+        firstname = normalize_string(request.GET['firstname'], option='name')
+        lastname = normalize_string(request.GET['lastname'], option='name')
+        attributes['firstname'] = firstname
+        attributes['lastname'] = lastname
         return JsonResponse(attributes)
 
     elif 'mail' in request.GET:
@@ -166,7 +204,7 @@ def add_user(request,
     email = str(attributes['email'])
     firstname = str(attributes['firstname'])
     lastname = str(attributes['lastname'])
-    password = encode_password(attributes['password'])
+    password = encode_password(unicode(attributes['password']).encode(encoding='utf-8'))
 
     ldap.add_user(username, email, firstname, lastname, password)
     send_mail(username, firstname, lastname, email, '', 'add')

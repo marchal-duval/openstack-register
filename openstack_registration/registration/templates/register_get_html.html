@@ -90,6 +90,7 @@ function check_form() {
     }
     else {
         document.getElementById("errorFirstname").innerHTML = '';
+        check_characters_name();
     }
     if ( $("#lastnameInput").val() == '' ) {
         document.getElementById("errorLastname").innerHTML = "Lastname can't be empty !";
@@ -119,6 +120,23 @@ function isUsernameExist() {
             check_empty_fields();
             if (( $("#usernameInput").val().length < 3 ) || ( $("#usernameInput").val().length > 20 )) {
                 document.getElementById("errorUsername").innerHTML = "Username have to contains 3 to 20 characters !";
+            }
+        }
+    );
+}
+
+function check_characters_name() {
+    $.getJSON( "/attributes/?format=json", { firstname: $('#firstnameInput').val(),
+                                             lastname: $('#lastnameInput').val()}).done(
+        function (json) {
+            $('#firstnameInput').val(json.firstname);
+            $('#lastnameInput').val(json.lastname);
+            check_empty_fields();
+            if ( $("#firstnameInput").val() == '' ) {
+                document.getElementById("errorFirstname").innerHTML = "Firstname can't be empty !";
+            }
+            if ( $("#lastnameInput").val() == '' ) {
+                document.getElementById("errorLastname").innerHTML = "Lastname can't be empty !";
             }
         }
     );

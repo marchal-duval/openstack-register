@@ -62,7 +62,8 @@ class OpenLdap(object):
     def search_user(self,
                     uid=None,
                     mail=None,
-                    attributes=None):
+                    attributes=None,
+                    password=None):
         if uid is not None:
             return self.connection.search_s(self.base_ou,
                                             ldap.SCOPE_SUBTREE,
@@ -82,6 +83,12 @@ class OpenLdap(object):
                                             "(&(objectClass=person)(uid={}))"
                                             .format(attributes),
                                             ['uid', 'mail', 'givenName', 'sn', 'cn'])
+        elif password is not None:
+            return self.connection.search_s(self.base_ou,
+                                            ldap.SCOPE_SUBTREE,
+                                            "(&(objectClass=person)(uid={}))"
+                                            .format(password),
+                                            ['userPassword'])
 
     def enable_user(self,
                     uuid):
@@ -105,3 +112,21 @@ class OpenLdap(object):
             user.delete()
 
         return attrs
+
+    def change_user_password(self,
+                             user,
+                             password):
+        attrs = {}
+        user_attributes = self.search_user(attributes=user)
+        dn_user = str(user_attributes[0][0])
+        update_attrs = [(ldap.MOD_REPLACE, 'userPassword', password)]
+
+        try:
+            self.connection.modify_s(dn_user, update_attrs)
+            attrs['status'] = 'success'
+        except:
+            attrs['status'] = 'fail'
+        return attrs
+
+
+
