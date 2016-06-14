@@ -168,17 +168,24 @@ def send_mail(username,
         random_string = uuid.uuid4()
         link = "http://134.158.76.228:8000/action/{}".format(random_string)
 
-        message = "Dear {} {}, \n\nYou just create an account on OpenStack@lal.\n" \
-                  "Please follow the ling to activate your account: \n{}" \
+        message = "Dear {} {}, \n\nYou just created an account on OpenStack@lal.\n" \
+                  "Please follow the link to activate your account: \n{}\n\n" \
+                  "You can have access to your profile on the registration " \
+                  "website but YOU ARE NOT ABLE TO AUTHENTICATE ON THE CLOUD " \
+                  "UNTIL ENABLED." \
                   "\n\nDon't reply at this email.".format(firstname,
                                                           lastname,
                                                           link)
         add_entry_database(random_string, username)
 
     elif action == 'enable':
-        message = "Dear {} {}, \n\nYour account have been enabled.\n" \
-                  "You can now login on http://134.158.76.228:8000/login " \
-                  "with your username '{}'." \
+        message = "Dear {} {}, \n\nYour account have been successfully " \
+                  "activated.\n" \
+                  "You still must belong to a project to use the platform.\n" \
+                  "Please contact your project administrator to be allowed " \
+                  "to connect to https://keystone.lal.in2p3.fr. \n\n" \
+                  "Your domain is 'stratuslab'.\n" \
+                  "Your Username is '{}'.\n" \
                   "\n\nDon't reply at this email.".format(firstname,
                                                           lastname,
                                                           username)
