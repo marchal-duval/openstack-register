@@ -173,9 +173,11 @@ def send_mail(username,
                   "You can have access to your profile on the registration " \
                   "website but YOU ARE NOT ABLE TO AUTHENTICATE ON THE CLOUD " \
                   "UNTIL ENABLED." \
-                  "\n\nDon't reply at this email.".format(firstname,
-                                                          lastname,
-                                                          link)
+                  "\n\nDon't reply at this email.\n" \
+                  "Support : https://glpi-openstack.lal.in2p3.fr/"\
+                  .format(firstname,
+                          lastname,
+                          link)
         add_entry_database(random_string, username)
 
     elif action == 'enable':
@@ -186,9 +188,11 @@ def send_mail(username,
                   "to connect to https://keystone.lal.in2p3.fr. \n\n" \
                   "Your domain is 'stratuslab'.\n" \
                   "Your Username is '{}'.\n" \
-                  "\n\nDon't reply at this email.".format(firstname,
-                                                          lastname,
-                                                          username)
+                  "\n\nDon't reply at this email.\n" \
+                  "Support : https://glpi-openstack.lal.in2p3.fr/"\
+                  .format(firstname,
+                          lastname,
+                          username)
 
     header.attach(MIMEText(message))
     mail_server = smtplib.SMTP('smtp.lal.in2p3.fr', 25)
