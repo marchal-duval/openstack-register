@@ -236,42 +236,42 @@ function check_password_constraints() {
 
 function check_empty_fields() {
     if ( $("#usernameInput").val() != '') {
-        $("#usernameInput").attr('style', 'border-color:black;')
+        $("#usernameInput").attr('style', 'border-color:;')
     }
     else {
         $("#usernameInput").attr('style', 'border-color:red;')
     }
 
     if ( $("#emailInput").val() != '') {
-        $("#emailInput").attr('style', 'border-color:black;')
+        $("#emailInput").attr('style', 'border-color:;')
     }
     else {
         $("#emailInput").attr('style', 'border-color:red;')
     }
 
     if ( $("#firstnameInput").val() != '') {
-        $("#firstnameInput").attr('style', 'border-color:black;')
+        $("#firstnameInput").attr('style', 'border-color:;')
     }
     else {
         $("#firstnameInput").attr('style', 'border-color:red;')
     }
 
     if ( $("#lastnameInput").val() != '') {
-        $("#lastnameInput").attr('style', 'border-color:black;')
+        $("#lastnameInput").attr('style', 'border-color:;')
     }
     else {
         $("#lastnameInput").attr('style', 'border-color:red;')
     }
 
     if ( $("#passwordInput").val() != '') {
-        $("#passwordInput").attr('style', 'border-color:black;')
+        $("#passwordInput").attr('style', 'border-color:;')
     }
     else {
         $("#passwordInput").attr('style', 'border-color:red;')
     }
 
     if ( $("#checkPasswordInput").val() != '') {
-        $("#checkPasswordInput").attr('style', 'border-color:black;')
+        $("#checkPasswordInput").attr('style', 'border-color:;')
     }
     else {
         $("#checkPasswordInput").attr('style', 'border-color:red;')
@@ -333,6 +333,15 @@ function isValidEmailAddress(emailAddress) {
             </div>
             <div class="col-sm-5">
                 <p id="errorLastname" style="color:red"></p>
+            </div>
+        </div>
+        <div class="form-group col-sm-10">
+            <label id="xDNLabel" class="control-label col-sm-2">X500 DN: </label>
+            <div id="xDN" class="col-sm-3">
+                <input id="xDNInput" type="text" value="" class="form-control" placeholder="X500 DN" aria-describedby="basic-addon1">
+            </div>
+            <div class="col-sm-5">
+                <p id="errorXDN" style="color:red"></p>
             </div>
         </div>
         <div class="form-group col-sm-10">

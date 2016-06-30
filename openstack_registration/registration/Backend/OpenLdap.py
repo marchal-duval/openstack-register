@@ -127,6 +127,3 @@ class OpenLdap(object):
         except:
             attrs['status'] = 'fail'
         return attrs
-
-
-

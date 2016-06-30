@@ -189,7 +189,7 @@ def send_mail(username,
                   "Your domain is 'stratuslab'.\n" \
                   "Your Username is '{}'.\n" \
                   "\n\nDon't reply at this email.\n" \
-                  "Support : https://glpi-openstack.lal.in2p3.fr/"\
+                  "Support : https://cloud-support.lal.in2p3.fr/"\
                   .format(firstname,
                           lastname,
                           username)
