@@ -134,6 +134,8 @@ GLOBAL_CONFIG['LDAP_SERVER'] = config.get('LDAP', 'server')
 GLOBAL_CONFIG['LDAP_USER'] = config.get('LDAP', 'bind_dn')
 GLOBAL_CONFIG['LDAP_PASSWORD'] = config.get('LDAP', 'password')
 GLOBAL_CONFIG['LDAP_BASE_OU'] = config.get('LDAP', 'user_search')
+GLOBAL_CONFIG['project'] = ''
+GLOBAL_CONFIG['admin'] = config.get('MAILING', 'admin')
 
 
 AUTH_LDAP_SERVER_URI = config.get('AUTH', 'server')

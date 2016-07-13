@@ -199,15 +199,17 @@ def attributes_dispatcher(request):
 
 def add_user(request,
              attributes):
+    GLOBAL_CONFIG['project'] = ''
     ldap = OpenLdap(GLOBAL_CONFIG)
     username = str(attributes['username'])
     email = str(attributes['email'])
     firstname = str(attributes['firstname'])
     lastname = str(attributes['lastname'])
+    GLOBAL_CONFIG['project'] = str(attributes['project'])
     password = encode_password(unicode(attributes['password']).encode(encoding='utf-8'))
 
     ldap.add_user(username, email, firstname, lastname, password)
-    send_mail(username, firstname, lastname, email, '', 'add')
+    send_mail(username, firstname, lastname, email, '', '', 'add')
 
 
 def activate_user(request):
@@ -219,7 +221,8 @@ def activate_user(request):
     try:
         attrs = ldap.enable_user(uuid)
         send_mail(attrs['username'], attrs['firstname'], attrs['lastname'],
-                  attrs['mail'], '', 'enable')
+                  attrs['mail'], GLOBAL_CONFIG['project'],
+                  GLOBAL_CONFIG['admin'], 'enable')
     except:
         info['info'] = 'Your account is already enable or the url is not ' \
                           'valid, please check your mailbox.'

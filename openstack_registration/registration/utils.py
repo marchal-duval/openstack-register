@@ -146,6 +146,7 @@ def send_mail(username,
               firstname,
               lastname,
               user_email,
+              project,
               admin_mail,
               action):
     """
@@ -159,28 +160,32 @@ def send_mail(username,
     :return:
     """
     message = ''
+    all_rcpt = ''
     header = MIMEMultipart()
-    header['From'] = 'no-reply@openstack.lal.in2p3.fr'
+    header['From'] = 'no-reply@lal.in2p3.fr'
     header['To'] = user_email
     header['Subject'] = 'OpenStack Registration Message'
 
+
     if action == 'add':
+        all_rcpt = user_email
         random_string = uuid.uuid4()
         link = "http://134.158.76.228:8000/action/{}".format(random_string)
-
         message = "Dear {} {}, \n\nYou just created an account on OpenStack@lal.\n" \
                   "Please follow the link to activate your account: \n{}\n\n" \
                   "You can have access to your profile on the registration " \
                   "website but YOU ARE NOT ABLE TO AUTHENTICATE ON THE CLOUD " \
                   "UNTIL ENABLED." \
                   "\n\nDon't reply at this email.\n" \
-                  "Support : https://glpi-openstack.lal.in2p3.fr/"\
+                  "Support : https://cloud-support.lal.in2p3.fr/"\
                   .format(firstname,
                           lastname,
                           link)
         add_entry_database(random_string, username)
 
     elif action == 'enable':
+        all_rcpt = str(admin_mail).split(',') + [user_email]
+        header['Bcc'] = str(admin_mail)
         message = "Dear {} {}, \n\nYour account have been successfully " \
                   "activated.\n" \
                   "You still must belong to a project to use the platform.\n" \
@@ -188,17 +193,19 @@ def send_mail(username,
                   "to connect to https://keystone.lal.in2p3.fr. \n\n" \
                   "Your domain is 'stratuslab'.\n" \
                   "Your Username is '{}'.\n" \
+                  "Project you want to be added : {}\n" \
                   "\n\nDon't reply at this email.\n" \
                   "Support : https://cloud-support.lal.in2p3.fr/"\
                   .format(firstname,
                           lastname,
-                          username)
+                          username,
+                          project)
 
     header.attach(MIMEText(message))
     mail_server = smtplib.SMTP('smtp.lal.in2p3.fr', 25)
-    mail_server.sendmail('root', user_email,
+    mail_server.sendmail('no-reply@lal.in2p3.fr', all_rcpt,
                          header.as_string())
-    # replace marchal@.. by user_email
+
     mail_server.quit()
 
 
