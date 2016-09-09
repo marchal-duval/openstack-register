@@ -80,6 +80,9 @@ function check_password_constraints() {
     if ( $("#newPasswordInput").val() != $("#reNewPasswordInput").val() ) {
             document.getElementById("errorPassword").innerHTML = "Password aren't matching !";
     }
+    else if ( $("#newPasswordInput").val() == $('#actualPasswordInput').val() ) {
+            document.getElementById("errorPassword").innerHTML = "Old and new password are the same !";
+    }
     else {
         document.getElementById("errorPassword").innerHTML = '';
     }

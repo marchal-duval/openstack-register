@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import auth
 from openstack_registration.settings import GLOBAL_CONFIG
 from Backend import OpenLdap
+from registration.exceptions import InvalidX500DN
 from utils import *
 
 
@@ -25,6 +26,8 @@ def login(request):
     :param request:
     :return:
     """
+    info = {}
+
     if request.user.is_authenticated():
         redirect_page = "/users/{}".format(request.user)
         return redirect(redirect_page)
@@ -37,7 +40,8 @@ def login(request):
                 auth.login(request, user)
                 return HttpResponseRedirect(redirect_page)
             else:
-                return render(request, "login.html")
+                info['info'] = 'Your login/password are wrong'
+                return render(request, "login.html", context=info)
         else:
             return render(request, "login.html")
 
@@ -205,10 +209,14 @@ def add_user(request,
     email = str(attributes['email'])
     firstname = str(attributes['firstname'])
     lastname = str(attributes['lastname'])
+    x500dn = str(attributes['x500dn'])
     GLOBAL_CONFIG['project'] = str(attributes['project'])
     password = encode_password(unicode(attributes['password']).encode(encoding='utf-8'))
 
-    ldap.add_user(username, email, firstname, lastname, password)
+    try:
+        ldap.add_user(username, email, firstname, lastname, x500dn, password)
+    except InvalidX500DN:
+        exit(1)
     send_mail(username, firstname, lastname, email, '', '', 'add')
 
 
@@ -222,7 +230,8 @@ def activate_user(request):
         attrs = ldap.enable_user(uuid)
         send_mail(attrs['username'], attrs['firstname'], attrs['lastname'],
                   attrs['mail'], GLOBAL_CONFIG['project'],
-                  GLOBAL_CONFIG['admin'], 'enable')
+                  'marchal@lal.in2p3.fr', 'enable')
+                  # GLOBAL_CONFIG['admin'], 'enable')
     except:
         info['info'] = 'Your account is already enable or the url is not ' \
                           'valid, please check your mailbox.'

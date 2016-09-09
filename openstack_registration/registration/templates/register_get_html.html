@@ -13,6 +13,7 @@ $(document).on("keyup click ready", function() {
 });
 
 $(function() {
+    get_certificate_dn();
     hide_see_password();
     hide_send_button_on_diff();
     $('#checkButton').click( function() {
@@ -31,6 +32,19 @@ $(function() {
     });
 });
 
+function get_certificate_dn() {
+    $('#xDNInput').val('');
+    $.ajax({
+        type: 'GET',
+        url: '/register',
+        success: function(data, textStatus, jqXHR){
+            if (jqXHR.getResponseHeader('SSL_CLIENT_S_DN') != '(null)') {
+               $('#xDNInput').val(jqXHR.getResponseHeader('SSL_CLIENT_S_DN'));
+            }
+        }
+    });
+}
+
 function add_user() {
     $.ajaxSetup({
         beforeSend : function(xhr) {
@@ -46,12 +60,14 @@ function add_user() {
                 'firstname': $('#firstnameInput').val(),
                 'lastname': $('#lastnameInput').val(),
                 'password': $('#passwordInput').val(),
-                'project': $('#projectInput').val()
+                'project': $('#projectInput').val(),
+                'x500dn': $('#xDNInput').val()
         },
         success: function() {
             clear_form();
         },
         error: function() {
+            document.getElementById("errorCreation").innerHTML = "ACCOUNT NOT CREATED";
         }
     });
 }
@@ -76,6 +92,7 @@ function hide_send_button_on_diff() {
 }
 
 function check_form() {
+    document.getElementById("errorCreation").innerHTML = '';
     if (( $("#usernameInput").val().length < 3 ) || ( $("#usernameInput").val().length > 20 )) {
         document.getElementById("errorUsername").innerHTML = "Username have to contains 3 to 20 characters !";
     }
@@ -404,6 +421,10 @@ function isValidEmailAddress(emailAddress) {
             <input class="btn btn-primary col-sm-2" id="checkButton" value="Check Form" type="button">
             <div class="col-sm-3"></div>
             <input class="btn btn-primary col-sm-1" type="hidden" id="sendButton" value="Send" disabled="">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-3">
+                <p id="errorCreation" style="color:red"></p>
+            </div>
         </div>
         <div class="col-sm-10">
             </br>

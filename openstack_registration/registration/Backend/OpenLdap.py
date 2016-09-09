@@ -3,13 +3,14 @@
 
 import ldap
 import ldap.sasl
+from PrototypeBackend import PrototypeBackend
+from registration.exceptions import InvalidX500DN
 from registration.models import UserActivation
 
 
-class OpenLdap(object):
-    def __init__(self,
-                 config):
-        super(OpenLdap, self).__init__()
+class OpenLdap(PrototypeBackend):
+    def __init__(self, config):
+        super(OpenLdap, self).__init__(config)
         self.global_config = config
         self.server = self.global_config['LDAP_SERVER']
         self.user = self.global_config['LDAP_USER']
@@ -27,6 +28,7 @@ class OpenLdap(object):
                  email,
                  firstname,
                  lastname,
+                 x500dn,
                  password):
         """
 
@@ -38,6 +40,8 @@ class OpenLdap(object):
         :return:
         """
         attributes = []
+        # data = {}
+
         dn_user = "uid={},ou=users,o=cloud".format(username)
         attrs = {
             'objectClass': ['organizationalPerson', 'person', 'inetOrgPerson', 'top'],
@@ -47,7 +51,8 @@ class OpenLdap(object):
             'sn': lastname,
             'cn': "{} {}".format(firstname, lastname),
             'userPassword': str(password),
-            'pager': '514'
+            'pager': '514',
+            'seeAlso': str(x500dn)
         }
 
         for value in attrs:
@@ -56,8 +61,20 @@ class OpenLdap(object):
 
         try:
             self.connection.add_s(dn_user, attributes)
+        except ldap.INVALID_SYNTAX:
+            raise InvalidX500DN('')
         except:
             exit(1)
+        #
+        # attr_x500dn = {
+        #     'seeAlso': str(x500dn)
+        # }
+        #
+        # try:
+        #     self.connection.add_s(dn_user, attr_x500dn)
+        # except:
+        #     data['status'] = 'X500 DN failed'
+        #     return data
 
     def search_user(self,
                     uid=None,
