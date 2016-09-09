@@ -9,6 +9,7 @@ from openstack_registration.settings import GLOBAL_CONFIG
 from Backend import OpenLdap
 from registration.exceptions import InvalidX500DN
 from utils import *
+from models import *
 
 
 def user_is_authenticate(request):

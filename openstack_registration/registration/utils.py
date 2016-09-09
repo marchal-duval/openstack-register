@@ -11,7 +11,8 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import uuid
-from models import UserActivation
+from models import UserActivation, UserInfo
+from datetime import datetime
 
 
 # def encode_password(password):
@@ -181,7 +182,7 @@ def send_mail(username,
                   .format(firstname,
                           lastname,
                           link)
-        add_entry_database(random_string, username)
+        add_entry_user_activation(random_string, username)
 
     elif action == 'enable':
         all_rcpt = str(admin_mail).split(',') + [user_email]
@@ -200,6 +201,7 @@ def send_mail(username,
                           lastname,
                           username,
                           project)
+        add_entry_user_info(username, datetime.now())
 
     header.attach(MIMEText(message))
     mail_server = smtplib.SMTP('smtp.lal.in2p3.fr', 25)
@@ -209,7 +211,13 @@ def send_mail(username,
     mail_server.quit()
 
 
-def add_entry_database(random_string,
-                       user):
+def add_entry_user_activation(random_string,
+                              user):
     new_user = UserActivation(link=random_string, username=user)
+    new_user.save()
+
+
+def add_entry_user_info(user,
+                        date):
+    new_user = UserInfo(username=user, last_agreement=date, enabled=True)
     new_user.save()
