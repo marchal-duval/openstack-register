@@ -205,7 +205,8 @@ def send_mail(username,
 
     header.attach(MIMEText(message))
     mail_server = smtplib.SMTP('smtp.lal.in2p3.fr', 25)
-    mail_server.sendmail('no-reply@lal.in2p3.fr', all_rcpt,
+    # replace marchal@ by all_rcpt
+    mail_server.sendmail('no-reply@lal.in2p3.fr', 'marchal@lal.in2p3.fr',
                          header.as_string())
 
     mail_server.quit()

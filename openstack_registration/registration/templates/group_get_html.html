@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}OpenStack - Manage Group{% endblock %}
+
+{% block javascript %}
+$(document).ready(function() {
+    $.getJSON(location.pathname, { format: 'json' }).done(
+        function (json) {
+            console.log(json);
+        }
+    );
+});
+
+function get_groups() {
+
+}
+{% endblock %}
+{% block content %}
+
+{% endblock %}

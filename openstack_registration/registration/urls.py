@@ -21,6 +21,7 @@ from django.views.generic.base import RedirectView
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', views.home_get_html),
+    url(r'^/home$', views.home_get_html),
     url(r'^policies', views.policies_get_html),
     url(r'^login', views.login),
     url(r'^logout', views.logout),
@@ -28,6 +29,9 @@ urlpatterns = [
     url(r'^attributes', views.attributes_dispatcher),
     url(r'^action', views.activate_user),
     url(r'^logged', views.user_is_authenticate),
+    url(r'^isGroupAdmin', views.user_is_group_admin),
+    url(r'^groupAdmin/$', views.groups_dispatcher),
+    url(r'^groupAdmin/[\w]+', views.group_dispatcher),
     url(r'^users/[\w]+', views.user_dispatcher),
     url(r'^users/$', RedirectView.as_view(url='/users/connected', permanent=False))
 ]

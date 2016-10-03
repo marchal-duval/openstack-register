@@ -23,6 +23,19 @@
                         else {
                             $('#login').html('<a href="/users/' + json.user + '">' + json.user + '</a>');
                             $('#logout').html('<a href="/logout"><span class="glyphicon glyphicon-log-out"></span></a>');
+
+                            $.getJSON('/isGroupAdmin').done(
+                                function (json) {
+                                    if (json.status == 'False') {
+                                        $('#isAdmin').html('');
+                                    }
+                                    else {
+                                        if (json.admin == 'True') {
+                                            $('#isAdmin').html('<a href="/groupAdmin">Manage Group</a>');
+                                        }
+                                    }
+                                }
+                            );
                         }
                     }
                 );
@@ -53,6 +66,9 @@
                          </li>
                          <li>
                              <a href="https://cloud-support.lal.in2p3.fr/" type="button" target="_blank">Support</a>
+                         </li>
+                         <li id="isAdmin">
+
                          </li>
                      </ul>
                      <ul class="nav navbar-nav navbar-right">

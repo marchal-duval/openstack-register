@@ -8,17 +8,48 @@ from django.contrib import auth
 from openstack_registration.settings import GLOBAL_CONFIG
 from Backend import OpenLdap
 from registration.exceptions import InvalidX500DN
+from registration.models import *
 from utils import *
-from models import *
 
 
 def user_is_authenticate(request):
+    """
+
+    :param request:
+    :return:
+    """
     data = {}
     data['status'] = 'False'
     if request.user.is_authenticated():
         data['status'] = 'True'
         data['user'] = str(request.user)
     return JsonResponse(data)
+
+
+def user_is_group_admin(request,
+                        type=None):
+    """
+
+    :param request:
+    :param type:
+    :return:
+    """
+    data = {}
+    data['status'] = 'False'
+    data['admin'] = 'False'
+
+    is_admin = GroupInfo.objects.filter(administrators__username=request.user)
+    if is_admin:
+        data['admin'] = 'True'
+        data['status'] = 'True'
+
+    if type == 'python':
+        return data
+    if type == 'info':
+        data['info'] = is_admin
+        return data
+    else:
+        return JsonResponse(data)
 
 
 def login(request):
@@ -60,6 +91,11 @@ def logout(request):
 
 @login_required()
 def user_dispatcher(request):
+    """
+
+    :param request:
+    :return:
+    """
     uri = request.path
     url_user = "/users/{}".format(request.user)
 
@@ -75,12 +111,80 @@ def user_dispatcher(request):
 
 
 @login_required()
+def groups_dispatcher(request):
+    """
+
+    :param request:
+    :return:
+    """
+    if request.method == 'GET'\
+            and 'format' in request.GET\
+            and request.GET['format'] == 'json':
+        return groups_get_json(request)
+    elif request.method == 'GET':
+        return groups_get_html(request)
+
+
+@login_required()
+def group_dispatcher(request):
+    """
+
+    :param request:
+    :return:
+    """
+    if request.method == 'GET'\
+            and 'format' in request.GET\
+            and request.GET['format'] == 'json':
+        return group_get_json(request)
+    elif request.method == 'GET':
+        return group_get_html(request)
+
+
+@login_required()
+def group_get_json(request):
+    """
+
+    :param request:
+    :return:
+    """
+    data = {}
+    ldap = OpenLdap(GLOBAL_CONFIG)
+    attrs = ldap.search_group(request.path_info.split('/')[2])
+    data['attrs'] = {}
+    for key, value in attrs:
+        for each in value:
+            data['attrs'][each] = value[each]
+
+    return JsonResponse(data)
+
+
+@login_required()
+def group_get_html(request):
+    """
+
+    :param request:
+    :return:
+    """
+    return render(request, 'group_get_html.html')
+
+
+@login_required()
 def user_get_html(request):
+    """
+
+    :param request:
+    :return:
+    """
     return render(request, 'user_get_html.html')
 
 
 @login_required()
 def user_get_json(request):
+    """
+
+    :param request:
+    :return:
+    """
     data = {}
     ldap = OpenLdap(GLOBAL_CONFIG)
     attrs = ldap.search_user(attributes=request.user)
@@ -101,6 +205,32 @@ def home_get_html(request):
     :return:
     """
     return render(request, 'home_get_html.html')
+
+
+@login_required()
+def groups_get_html(request):
+    """
+
+    :param request:
+    :return:
+    """
+    data = user_is_group_admin(request, type='python')
+    if data['status'] != 'True':
+        return render(request, 'home_get_html.html')
+    else:
+        return render(request, 'groups_get_html.html')
+
+
+@login_required()
+def groups_get_json(request):
+    data = {}
+    is_admin = user_is_group_admin(request, type='info')
+    groups = []
+    for each in is_admin['info']:
+        groups.append(each.group_name)
+
+    data['groups'] = groups
+    return JsonResponse(data)
 
 
 def policies_get_html(request):
