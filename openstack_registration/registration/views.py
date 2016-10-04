@@ -35,18 +35,18 @@ def user_is_group_admin(request,
     :return:
     """
     data = {}
+    group_list = []
     data['status'] = 'False'
     data['admin'] = 'False'
 
     is_admin = GroupInfo.objects.filter(administrators__username=request.user)
     if is_admin:
-        data['admin'] = 'True'
+        for each in is_admin:
+            group_list.append(str(each.group_name))
+        data['admin'] = group_list
         data['status'] = 'True'
 
     if type == 'python':
-        return data
-    if type == 'info':
-        data['info'] = is_admin
         return data
     else:
         return JsonResponse(data)
@@ -119,10 +119,16 @@ def groups_dispatcher(request):
     """
     if request.method == 'GET'\
             and 'format' in request.GET\
-            and request.GET['format'] == 'json':
+            and request.GET['format'] == 'json'\
+            and user_is_group_admin(request, type='python')['admin'] != 'False':
+            # and request.path in user_is_group_admin(request, type='python')['admin']:
+
         return groups_get_json(request)
-    elif request.method == 'GET':
+    elif request.method == 'GET'\
+            and user_is_group_admin(request, type='python')['admin'] != 'False':
         return groups_get_html(request)
+    else:
+        return redirect('/')
 
 
 @login_required()
@@ -134,11 +140,16 @@ def group_dispatcher(request):
     """
     if request.method == 'GET'\
             and 'format' in request.GET\
-            and request.GET['format'] == 'json':
+            and request.GET['format'] == 'json'\
+            and user_is_group_admin(request, type='python')['admin'] != 'False'\
+            and request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin']:
         return group_get_json(request)
-    elif request.method == 'GET':
+    elif request.method == 'GET'\
+            and user_is_group_admin(request, type='python')['admin'] != 'False'\
+            and request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin']:
         return group_get_html(request)
-
+    else:
+        return redirect('/')
 
 @login_required()
 def group_get_json(request):
@@ -216,7 +227,7 @@ def groups_get_html(request):
     """
     data = user_is_group_admin(request, type='python')
     if data['status'] != 'True':
-        return render(request, 'home_get_html.html')
+        return redirect('/')
     else:
         return render(request, 'groups_get_html.html')
 
@@ -224,10 +235,10 @@ def groups_get_html(request):
 @login_required()
 def groups_get_json(request):
     data = {}
-    is_admin = user_is_group_admin(request, type='info')
+    is_admin = user_is_group_admin(request, type='python')
     groups = []
-    for each in is_admin['info']:
-        groups.append(each.group_name)
+    for each in is_admin['admin']:
+        groups.append(each)
 
     data['groups'] = groups
     return JsonResponse(data)
