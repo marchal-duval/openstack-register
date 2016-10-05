@@ -99,7 +99,8 @@ def user_dispatcher(request):
     uri = request.path
     url_user = "/users/{}".format(request.user)
 
-    if uri != url_user:
+    if uri != url_user\
+            and 'dn' not in request.GET:
         return HttpResponseRedirect(url_user)
     else:
         if request.method == 'GET'\
@@ -159,13 +160,16 @@ def group_get_json(request):
     :return:
     """
     data = {}
+
     ldap = OpenLdap(GLOBAL_CONFIG)
     attrs = ldap.search_group(request.path_info.split('/')[2])
     data['attrs'] = {}
     for key, value in attrs:
         for each in value:
             data['attrs'][each] = value[each]
-
+    if data['attrs']['uniqueMember'] is not '':
+        members = user_get_json(request, spec=data['attrs']['uniqueMember'])
+        data['members'] = members['members']
     return JsonResponse(data)
 
 
@@ -190,7 +194,8 @@ def user_get_html(request):
 
 
 @login_required()
-def user_get_json(request):
+def user_get_json(request,
+                  spec=None):
     """
 
     :param request:
@@ -198,13 +203,29 @@ def user_get_json(request):
     """
     data = {}
     ldap = OpenLdap(GLOBAL_CONFIG)
-    attrs = ldap.search_user(attributes=request.user)
     data['attrs'] = {}
+    members = []
+    final_list = []
 
-    # attrs = attrs[0][1]
-    for key, value in attrs:
-        for each in value:
-            data['attrs'][each] = value[each]
+    if spec is not None:
+        for uid in spec:
+            attrs = ldap.search_user(attributes=str(uid).split('=')[1].split(',')[0])
+            members.append(attrs[0][1])
+
+        for each in members:
+            tmp = each
+            for key in tmp:
+                tmp[key] = tmp[key][0]
+            final_list.append(tmp)
+
+        data['members'] = final_list
+        return data
+    else:
+        attrs = ldap.search_user(attributes=request.user)
+
+        for key, value in attrs:
+            for each in value:
+                data['attrs'][each] = value[each]
 
     return JsonResponse(data)
 

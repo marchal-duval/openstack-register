@@ -87,7 +87,6 @@ class OpenLdap(PrototypeBackend):
                                             "(&(objectClass=person)(uid={}))"
                                             .format(uid),
                                             ['uid'])
-
         elif mail is not None:
             return self.connection.search_s(self.base_ou,
                                             ldap.SCOPE_SUBTREE,

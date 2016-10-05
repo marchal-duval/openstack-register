@@ -4,18 +4,147 @@
 {% block title %}OpenStack - Manage Group{% endblock %}
 
 {% block javascript %}
-$(document).ready(function() {
-    $.getJSON(location.pathname, { format: 'json' }).done(
-        function (json) {
+var users = [];
+var users_attributes = [''];
 
-        }
-    );
+$(document).ready(function() {
+    get_group();
 });
 
-function get_groups() {
+function get_group() {
+    $("#table_id").DataTable( {
+        ajax: {
+            url: location.pathname + "?format=json",
+            dataSrc: function (json) {
+                console.log(json.members);
+                $('#nameInput').val(json.attrs.cn);
+                $('#descriptionInput').val(json.attrs.description);
 
+                return json.members;
+            }
+        },
+        columns: [
+            { data: 'uid'},
+            { data: 'mail'},
+        ],
+        order: [[ 0, 'desc' ]],
+        iDisplayLength: 10,
+        drawCallback: function (settings) {
+            colorLine();
+        },
+        lengthMenu: [ [5, 10, 25, 50, -1], [5, 10, 25, 50, "ALL"] ],
+    });
 }
-{% endblock %}
-{% block content %}
 
+function colorLine () {
+    var numberOfRows;
+    var eachRow;
+    eachRow = document.getElementById('users_table').rows
+    numberOfRows = eachRow.length;
+    for (var i = 0; i < numberOfRows; i++) {
+        if (eachRow[i].className == 'odd') {
+            eachRow[i].setAttribute('style', 'background: #f3f3f3');
+        }
+        else {
+            eachRow[i].removeAttribute('style');
+        }
+    }
+}
+
+{% endblock %}
+
+{% block content %}
+<div class="col-sm-12">
+	<div class="panel panel-default" style="height: 200px;">
+		<div class="panel-heading">
+            <h1 class="panel-title" align="center"><b>About the group</b></h1>
+        </div>
+		<div class="panel-body">
+            <form class="form-horizontal">
+				<div class="form-group">
+                    <label class="control-label col-sm-3">Name : </label>
+                    <div class="col-sm-7">
+                        <input id="nameInput" type="text" class="form-control" placeholder="Group name" aria-describedby="basic-addon1" disabled>
+                    </div>
+                </div>
+				<div class="form-group">
+                    <label class="control-label col-sm-3">Description : </label>
+                    <div class="col-sm-7">
+                        <input id="descriptionInput" type="text" class="form-control" placeholder="Description" aria-describedby="basic-addon1" disabled>
+                    </div>
+                </div>
+				<!--<div class="form-group">-->
+                    <!--<label class="control-label col-sm-3">CN : </label>-->
+                    <!--<div class="col-sm-7">-->
+                        <!--<input id="cnInput" type="text" class="form-control" placeholder="CN" aria-describedby="basic-addon1" disabled>-->
+                    <!--</div>-->
+                <!--</div>-->
+				<!--<div class="form-group">-->
+                    <!--<label class="control-label col-sm-3">OU : </label>-->
+                    <!--<div class="col-sm-7">-->
+                        <!--<input id="ouInput" type="text" class="form-control" placeholder="OU" aria-describedby="basic-addon1" disabled>-->
+                    <!--</div>-->
+                <!--</div>-->
+			</form>
+		</div>
+	</div><br />
+    <div style="text-align:right;">
+        <button id="addUserButton" type="button" class="btn btn-primary">Add user</button>
+    </div><br />
+    <div id="toshow" class="col-sm-12" style="text-align:center;" hidden="hidden"> <!---->
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="col-sm-2">
+                    <label class="control-label">{% trans 'Search for an user :' %}</label>
+                </div>
+                <div class="col-sm-5 input-group">
+                    <input id="searchInput" list="datalistId" type="text" value="" class="form-control" />
+                    <datalist id="datalistId">
+                        <option selected>
+                    </datalist>
+                    <span id="searchButton" class="input-group-addon btn-primary" role="button">
+                        <span class="glyphicon glyphicon-search"></span>
+                    </span>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="col-sm-1" style="text-align: right;">
+                    <br /><button id="addingButton" type="button" class="btn btn-primary" disabled="disabled">{% trans 'Add' %}</button>
+                </div>
+                <div class="col-sm-11" style="text-align: left;">
+                    <div style="text-align: center;color:red;" id="message"><br /></div>
+                    <b>Unix ID: </b><span id="unixu"></span><br />
+                    <b>Windows ID: </b><span id="windu"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-12 panel panel-default">
+        <div class="panel-heading">
+            <h1 class="panel-title" align="center"><b>Members</b><br/>
+                Login & email</h1>
+        </div>
+        <div class="panel-body">
+            <div class="col-sm-1">
+
+            </div>
+            <div class="row col-sm-10">
+                <table id="table_id" class="display" width="100%">
+                    <thead>
+                        <tr>
+                            <th>
+                                User
+                            </th>
+                            <th>
+                                Email
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="users_table">
+                    </tbody>
+                </table>
+            </div>
+		</div>
+    </div>
+</div>
 {% endblock %}
