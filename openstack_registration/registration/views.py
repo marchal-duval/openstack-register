@@ -149,8 +149,31 @@ def group_dispatcher(request):
             and user_is_group_admin(request, type='python')['admin'] != 'False'\
             and request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin']:
         return group_get_html(request)
+    elif request.method == 'DEL'\
+            and user_is_group_admin(request, type='python')['admin'] != 'False'\
+            and request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin']:
+        return group_del_json(request)
     else:
         return redirect('/')
+
+
+@login_required()
+def group_del_json(request):
+    ldap = OpenLdap(GLOBAL_CONFIG)
+    data = QueryDict(request.body).dict()
+    user = data['user']
+    group = request.path_info.split('/')[2]
+    dn_user = ldap.search_user(uid=user)[0][0]
+    dn_group = ldap.search_group(group)[0][0]
+
+    info = ldap.delete_user_from_group(dn_user, dn_group)
+    if info:
+        status = "True"
+    else:
+        status = "False"
+    data['status'] = status
+    return JsonResponse(data)
+
 
 @login_required()
 def group_get_json(request):
@@ -164,9 +187,11 @@ def group_get_json(request):
     ldap = OpenLdap(GLOBAL_CONFIG)
     attrs = ldap.search_group(request.path_info.split('/')[2])
     data['attrs'] = {}
+
     for key, value in attrs:
         for each in value:
             data['attrs'][each] = value[each]
+
     if data['attrs']['uniqueMember'] is not '':
         members = user_get_json(request, spec=data['attrs']['uniqueMember'])
         data['members'] = members['members']
@@ -216,6 +241,7 @@ def user_get_json(request,
             tmp = each
             for key in tmp:
                 tmp[key] = tmp[key][0]
+            tmp['icon'] = ''
             final_list.append(tmp)
 
         data['members'] = final_list
@@ -226,7 +252,6 @@ def user_get_json(request,
         for key, value in attrs:
             for each in value:
                 data['attrs'][each] = value[each]
-
     return JsonResponse(data)
 
 

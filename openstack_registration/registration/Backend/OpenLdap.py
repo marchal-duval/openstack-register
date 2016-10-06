@@ -23,6 +23,28 @@ class OpenLdap(PrototypeBackend):
         except:
             print 'error during openLdap connection'
 
+    def delete_user_from_group(self,
+                             user,
+                             group):
+        """
+
+        :param user:
+        :param group:
+        :return:
+        """
+        dn_user = user.encode('utf-8')
+        dn_group = group.encode('utf-8')
+        ok = False
+        try:
+            self.connection.modify_s(dn_group,
+                                     [(ldap.MOD_DELETE,
+                                       'uniqueMember', dn_user)])
+            ok = True
+        except:
+            print "Error while removing user " + dn_user + " from group " +dn_group
+
+        return ok
+
     def add_user(self,
                  username,
                  email,
