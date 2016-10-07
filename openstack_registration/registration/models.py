@@ -15,7 +15,8 @@ class UserInfo(models.Model):
     creation_date = models.DateField(auto_now_add=True, auto_now=False)
     last_agreement = models.DateField(auto_now_add=False, auto_now=False)
     enabled = models.BooleanField(default=False)
-    group = models.CharField(max_length=32)
+    admin = models.BooleanField(default=False)
+    # group = models.CharField(max_length=32, null=False, default='')
 
     def __unicode__(self):
         return self.username

@@ -36,15 +36,28 @@ def user_is_group_admin(request,
     """
     data = {}
     group_list = []
+    user_list = []
     data['status'] = 'False'
     data['admin'] = 'False'
-
+    user_admin = None
+    # print IsAdmin.objects.filter(group__group_name="test-admin2")
+    # print IsAdmin.objects.get(group=)
+    # print IsAdmin.objects.filter(group__group_name="test-admin2")[0].administrators
     is_admin = GroupInfo.objects.filter(administrators__username=request.user)
+    if request.path_info.split('/')[1] == 'groupAdmin':
+        location = request.path_info.split('/')[2]
+        user_admin = IsAdmin.objects.filter(group__group_name=location)
+
     if is_admin:
         for each in is_admin:
             group_list.append(str(each.group_name))
+        if user_admin:
+            for each in user_admin:
+                user_list.append(str(each.administrators))
+            data['user'] = user_list
         data['admin'] = group_list
         data['status'] = 'True'
+
 
     if type == 'python':
         return data
@@ -160,6 +173,12 @@ def group_dispatcher(request):
             and request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin']:
         return group_get_html(request)
 
+    elif request.method == 'GET'\
+            and 'admin' in request.GET\
+            and user_is_group_admin(request, type='python')['admin'] != 'False'\
+            and request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin']:
+        return group_get_json(request)
+
     elif request.method == 'DEL'\
             and user_is_group_admin(request, type='python')['admin'] != 'False'\
             and request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin']:
@@ -228,18 +247,29 @@ def group_get_json(request):
     :return:
     """
     data = {}
-
     ldap = OpenLdap(GLOBAL_CONFIG)
-    attrs = ldap.search_group(request.path_info.split('/')[2])
-    data['attrs'] = {}
+    user_list = []
 
-    for key, value in attrs:
-        for each in value:
-            data['attrs'][each] = value[each]
+    if 'admin' in request.GET:
+        location = request.path_info.split('/')[2]
+        user_admin = IsAdmin.objects.filter(group__group_name=location)
+        if user_admin:
+            for each in user_admin:
+                user_list.append(str(each.administrators))
+            data['admin'] = user_list
 
-    if data['attrs']['uniqueMember'] is not '':
-        members = user_get_json(request, spec=data['attrs']['uniqueMember'])
-        data['members'] = members['members']
+    else:
+        attrs = ldap.search_group(request.path_info.split('/')[2])
+        data['attrs'] = {}
+
+        for key, value in attrs:
+            for each in value:
+                data['attrs'][each] = value[each]
+
+        if data['attrs']['uniqueMember'] is not '':
+            members = user_get_json(request, spec=data['attrs']['uniqueMember'])
+            data['members'] = members['members']
+            data['admin'] = members['admin']
     return JsonResponse(data)
 
 
@@ -278,6 +308,7 @@ def user_get_json(request,
     members = []
     final_list = []
     final_dict = {}
+    admin_list = []
 
     if spec is not None:
         for uid in spec:
@@ -289,7 +320,15 @@ def user_get_json(request,
             for key in tmp:
                 tmp[key] = tmp[key][0]
             tmp['icon'] = ''
+            tmp['admin'] = ''
             final_list.append(tmp)
+
+        location = request.path_info.split('/')[2]
+        user_admin = IsAdmin.objects.filter(group__group_name=location)
+        if user_admin:
+            for each in user_admin:
+                admin_list.append(str(each.administrators))
+        data['admin'] = admin_list
 
         data['members'] = final_list
         return data

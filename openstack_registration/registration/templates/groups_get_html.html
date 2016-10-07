@@ -5,6 +5,10 @@
 
 {% block javascript %}
 $(document).ready(function() {
+    get_groups();
+});
+
+function get_groups() {
     $.getJSON(location.pathname, { format: 'json' }).done(
         function (json) {
             $.each( json.groups, function( index, value ) {
@@ -12,10 +16,6 @@ $(document).ready(function() {
             });
         }
     );
-});
-
-function get_groups() {
-
 }
 {% endblock %}
 {% block content %}
