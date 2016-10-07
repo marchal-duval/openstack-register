@@ -141,32 +141,77 @@ def group_dispatcher(request):
     """
     if request.method == 'GET'\
             and 'format' in request.GET\
+            and 'email' in request.GET\
+            and request.GET['format'] == 'json'\
+            and request.GET['email'] == 'bar'\
+            and user_is_group_admin(request, type='python')['admin'] != 'False'\
+            and request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin']:
+        return user_get_json(request)
+
+    elif request.method == 'GET'\
+            and 'format' in request.GET\
             and request.GET['format'] == 'json'\
             and user_is_group_admin(request, type='python')['admin'] != 'False'\
             and request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin']:
         return group_get_json(request)
+
     elif request.method == 'GET'\
             and user_is_group_admin(request, type='python')['admin'] != 'False'\
             and request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin']:
         return group_get_html(request)
+
     elif request.method == 'DEL'\
             and user_is_group_admin(request, type='python')['admin'] != 'False'\
             and request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin']:
         return group_del_json(request)
+
+    elif request.method == 'PUT'\
+        and user_is_group_admin(request, type='python')['admin'] != 'False'\
+        and request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin']:
+        return group_add_json(request)
+
     else:
         return redirect('/')
 
 
 @login_required()
-def group_del_json(request):
+def group_add_json(request):
+    """
+
+    :param request:
+    :return:
+    """
     ldap = OpenLdap(GLOBAL_CONFIG)
     data = QueryDict(request.body).dict()
     user = data['user']
     group = request.path_info.split('/')[2]
     dn_user = ldap.search_user(uid=user)[0][0]
     dn_group = ldap.search_group(group)[0][0]
+    info = ldap.add_user_from_group(dn_user, dn_group)
 
+    if info:
+        status = "True"
+    else:
+        status = "False"
+    data['status'] = status
+    return JsonResponse(data)
+
+
+@login_required()
+def group_del_json(request):
+    """
+
+    :param request:
+    :return:
+    """
+    ldap = OpenLdap(GLOBAL_CONFIG)
+    data = QueryDict(request.body).dict()
+    user = data['user']
+    group = request.path_info.split('/')[2]
+    dn_user = ldap.search_user(uid=user)[0][0]
+    dn_group = ldap.search_group(group)[0][0]
     info = ldap.delete_user_from_group(dn_user, dn_group)
+
     if info:
         status = "True"
     else:
@@ -229,8 +274,10 @@ def user_get_json(request,
     data = {}
     ldap = OpenLdap(GLOBAL_CONFIG)
     data['attrs'] = {}
+    data['users'] = {}
     members = []
     final_list = []
+    final_dict = {}
 
     if spec is not None:
         for uid in spec:
@@ -246,6 +293,16 @@ def user_get_json(request,
 
         data['members'] = final_list
         return data
+    elif 'email' in request.GET:
+        users = ldap.search_user(uid="foo", mail="bar")
+        for each in users:
+            members.append(each[1])
+        for each in members:
+            tmp = each
+            final_dict[tmp['uid'][0]] = tmp['mail'][0]
+        data['users'] = final_dict
+        return JsonResponse(data)
+
     else:
         attrs = ldap.search_user(attributes=request.user)
 

@@ -24,8 +24,8 @@ class OpenLdap(PrototypeBackend):
             print 'error during openLdap connection'
 
     def delete_user_from_group(self,
-                             user,
-                             group):
+                               user,
+                               group):
         """
 
         :param user:
@@ -41,7 +41,29 @@ class OpenLdap(PrototypeBackend):
                                        'uniqueMember', dn_user)])
             ok = True
         except:
-            print "Error while removing user " + dn_user + " from group " +dn_group
+            print "Error while removing user " + dn_user + " from group " + dn_group
+
+        return ok
+
+    def add_user_from_group(self,
+                               user,
+                               group):
+        """
+
+        :param user:
+        :param group:
+        :return:
+        """
+        dn_user = user.encode('utf-8')
+        dn_group = group.encode('utf-8')
+        ok = False
+        try:
+            self.connection.modify_s(dn_group,
+                                     [(ldap.MOD_ADD,
+                                       'uniqueMember', dn_user)])
+            ok = True
+        except:
+            print "Error while adding user " + dn_user + " from group " + dn_group
 
         return ok
 
@@ -58,6 +80,7 @@ class OpenLdap(PrototypeBackend):
         :param email:
         :param firstname:
         :param lastname:
+        :param x500dn:
         :param password:
         :return:
         """
@@ -103,7 +126,12 @@ class OpenLdap(PrototypeBackend):
                     mail=None,
                     attributes=None,
                     password=None):
-        if uid is not None:
+        if uid is not None and mail is not None:
+             return self.connection.search_s(self.base_ou,
+                                            ldap.SCOPE_SUBTREE,
+                                            "(&(objectClass=person)(uid=*))",
+                                             ['uid', 'mail'])
+        elif uid is not None:
             return self.connection.search_s(self.base_ou,
                                             ldap.SCOPE_SUBTREE,
                                             "(&(objectClass=person)(uid={}))"
@@ -128,14 +156,13 @@ class OpenLdap(PrototypeBackend):
                                             .format(password),
                                             ['userPassword'])
 
-
     def search_group(self,
                      uid):
         return self.connection.search_s('ou=groups,o=cloud',
-                                            ldap.SCOPE_SUBTREE,
-                                            "(&(objectClass=groupOfUniqueNames)(cn={}))"
-                                            .format(uid),
-                                            ['uniqueMember', 'cn', 'description'])
+                                        ldap.SCOPE_SUBTREE,
+                                        "(&(objectClass=groupOfUniqueNames)(cn={}))"
+                                        .format(uid),
+                                        ['uniqueMember', 'cn', 'description'])
 
     def enable_user(self,
                     uuid):

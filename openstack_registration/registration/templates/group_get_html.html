@@ -9,7 +9,28 @@ var users_attributes = [''];
 
 $(document).ready(function() {
     get_group();
+    getDataListUsers()
+    $('#addingButton').click(function() {
+        addUserFromGroup( $('#searchInput').val(), 'add');
+    });
 });
+
+function sortOnKeys(dict) {
+    var sorted = [];
+    for(var key in dict) {
+        sorted[sorted.length] = key;
+    }
+    sorted.sort(function (a, b) {
+        return a.toLowerCase().localeCompare(b.toLowerCase());
+    });
+
+    var tempDict = {};
+    for(var i = 0; i < sorted.length; i++) {
+        tempDict[sorted[i]] = dict[sorted[i]];
+    }
+
+    return tempDict;
+}
 
 function get_group() {
     $("#table_id").DataTable( {
@@ -69,24 +90,43 @@ function removeUserFromGroup(user, action) {
         },
         success: function(json) {
             $("#table_id").DataTable().ajax.reload();
-            <!--if(json['status'] == "success"){-->
-                <!--$("#windu").text('');-->
-                <!--$("#unixu").text('');-->
-                <!--$("#message").html("<br />");-->
-                <!--alert(user_attrs[1]+hbatg);-->
-                <!--$('#addingButton').attr('disabled', 'disabled');-->
-                <!--load_group();-->
-            <!--}-->
-            <!--else if(json['status'] == "failed"){-->
-                <!--$("#message").text(edpoa+user_attrs[1]+ttg);-->
-            <!--}-->
-            <!--else{-->
-                <!--alert(pwta);-->
-            <!--}-->
-        <!--},-->
-        <!--error: function() {-->
         }
     });
+}
+
+function addUserFromGroup(user, action) {
+$.ajaxSetup({
+        beforeSend : function(xhr) {
+            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}" );
+        }
+    });
+    $.ajax({
+        url: location.pathname,
+        type: 'PUT',
+        data: { 'format': 'json',
+                'user': user,
+                'action': action
+        },
+        success: function(json) {
+            $("#table_id").DataTable().ajax.reload();
+        }
+    });
+}
+
+function getDataListUsers() {
+    var datas = [];
+    var liste = $("#inputDataList");
+    <!--var liste = $("#datalistID");-->
+    liste.find('option').remove().end();
+    $.getJSON(location.pathname + "?format=json&email=bar").done(
+        function(json) {
+            datas = sortOnKeys(json.users);
+             $.each(datas, function(index, value) {
+                liste.append('<option value="' + index + '">'+value+'</option>>');
+                liste.append('<option value="' + index + '">'+index+'</option>>');
+            });
+        }
+    );
 }
 
 {% endblock %}
@@ -126,33 +166,34 @@ function removeUserFromGroup(user, action) {
 			</form>
 		</div>
 	</div><br />
-    <div style="text-align:right;">
-        <button id="addUserButton" type="button" class="btn btn-primary">Add user</button>
+    <div style="text-align:center;">
+        <a href="#addUserFromGroup" id="addUserButton" type="button" class="btn btn-primary" data-toggle="modal" role="button">Add user</a>
     </div><br />
-    <div id="toshow" class="col-sm-12" style="text-align:center;" hidden="hidden"> <!---->
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <div class="col-sm-2">
-                    <label class="control-label">{% trans 'Search for an user :' %}</label>
+    <div id="addUserFromGroup" class="modal in" tabindex="-1" role="dialog" style="text-align:center;" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">Add an user to this group</h4>
                 </div>
-                <div class="col-sm-5 input-group">
-                    <input id="searchInput" list="datalistId" type="text" value="" class="form-control" />
-                    <datalist id="datalistId">
-                        <option selected>
-                    </datalist>
-                    <span id="searchButton" class="input-group-addon btn-primary" role="button">
-                        <span class="glyphicon glyphicon-search"></span>
-                    </span>
+                <div class="modal-body">
+                    <div style="text-align:left;">
+                        <p><strong>You can search by username or email</strong></p>
+                    </div>
+                    <div class="form-group input-group">
+                        <input id="searchInput" list="inputDataList" type="text" value="" class="form-control" />
+                        <datalist id="inputDataList">
+                            <option selected>
+                        </datalist>
+                        <span id="searchButton" class="input-group-addon" style="padding: 0px 0px; border: 0px;">
+                            <span class="glyphicon glyphicon-search btn btn-primary"></span>
+                        </span>
+                    </div>
                 </div>
-            </div>
-            <div class="panel-body">
-                <div class="col-sm-1" style="text-align: right;">
-                    <br /><button id="addingButton" type="button" class="btn btn-primary" disabled="disabled">{% trans 'Add' %}</button>
-                </div>
-                <div class="col-sm-11" style="text-align: left;">
-                    <div style="text-align: center;color:red;" id="message"><br /></div>
-                    <b>Unix ID: </b><span id="unixu"></span><br />
-                    <b>Windows ID: </b><span id="windu"></span>
+                <div class="modal-footer" id="foot">
+                    <button id="addingButton" type="button" class="btn btn-primary">Add</button>
                 </div>
             </div>
         </div>
