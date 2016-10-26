@@ -193,6 +193,7 @@ class OpenLdap(PrototypeBackend):
         attrs = {}
         user_attributes = self.search_user(attributes=user)
         dn_user = str(user_attributes[0][0])
+        # print password
         update_attrs = [(ldap.MOD_REPLACE, 'userPassword', password)]
 
         try:

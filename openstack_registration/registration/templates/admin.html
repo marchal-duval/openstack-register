@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}OpenStack - Super admin{% endblock %}
+
+{% block javascript %}
+$(document).ready(function() {
+    getDataListUsers();
+    get_admin();
+    $('#addingButton').click(function() {
+        addSuperAdmin( $('#searchInput').val(), 'add');
+    });
+});
+
+function sortOnKeys(dict) {
+    var sorted = [];
+    for(var key in dict) {
+        sorted[sorted.length] = key;
+    }
+    sorted.sort(function (a, b) {
+        return a.toLowerCase().localeCompare(b.toLowerCase());
+    });
+
+    var tempDict = {};
+    for(var i = 0; i < sorted.length; i++) {
+        tempDict[sorted[i]] = dict[sorted[i]];
+    }
+
+    return tempDict;
+}
+
+function getDataListUsers() {
+    var datas = [];
+    var liste = $("#inputDataList");
+    liste.find('option').remove().end();
+
+    $.getJSON(location.pathname + "?format=json&email=bar").done(
+        function(json) {
+            datas = sortOnKeys(json.users);
+             $.each(datas, function(index, value) {
+                liste.append('<option value="' + index + '">'+value+'</option>>');
+                liste.append('<option value="' + index + '">'+index+'</option>>');
+            });
+        }
+    );
+}
+
+function get_admin() {
+    $("#table_id").DataTable( {
+        ajax: {
+            url: location.pathname + "?format=json&spec=dataTable",
+            dataSrc: function (json) {
+                $.each(json.list, function (index, value) {
+                    value.icon = '<a style="color:red;" href=\''+"javascript:removeSuperAdmin(\""+value["uid"]+"\", \"remove\");'><span class='glyphicon glyphicon-remove'></span></a>";
+                });
+
+                return json.list;
+            }
+        },
+        columns: [
+            { data: 'icon'},
+            { data: 'uid'},
+            <!--{ data: 'mail'}-->
+        ],
+        order: [[ 0, 'desc' ]],
+        iDisplayLength: 10,
+        drawCallback: function (settings) {
+            colorLine();
+        },
+        lengthMenu: [ [5, 10, 25, 50, -1], [5, 10, 25, 50, "ALL"] ],
+    });
+}
+
+function colorLine () {
+    var numberOfRows;
+    var eachRow;
+    eachRow = document.getElementById('users_table').rows
+    numberOfRows = eachRow.length;
+    for (var i = 0; i < numberOfRows; i++) {
+        if (eachRow[i].className == 'odd') {
+            eachRow[i].setAttribute('style', 'background: #f3f3f3');
+        }
+        else {
+            eachRow[i].removeAttribute('style');
+        }
+    }
+}
+
+function addSuperAdmin(user, action) {
+$.ajaxSetup({
+        beforeSend : function(xhr) {
+            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}" );
+        }
+    });
+    $.ajax({
+        url: location.pathname,
+        type: 'PUT',
+        data: { 'format': 'json',
+                'user': user,
+                'action': action
+        },
+        success: function(json) {
+            $("#table_id").DataTable().ajax.reload();
+        }
+    });
+}
+
+function removeSuperAdmin(user, action) {
+    $.ajaxSetup({
+        beforeSend : function(xhr) {
+            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}" );
+        }
+    });
+    $.ajax({
+        url: location.pathname,
+        type: 'PUT',
+        data: { 'format': 'json',
+                'user': user,
+                'action': action
+        },
+        success: function(json) {
+            $("#table_id").DataTable().ajax.reload();
+            if (json.status == 'itself') {
+                alert('You are trying to delete yourself !');
+            }
+        }
+    });
+}
+
+{% endblock %}
+{% block content %}
+<div>
+    <h1>Here you are on super admin page</h1>
+    <h2>May the force be with you ! (be careful about the dark side you are a jedi master; not a padawan)</h2>
+    </br>
+
+    <div class="col-sm-12">
+        <div>
+            <a href="#addUserFromGroup" id="addUserButton" type="button" class="btn btn-primary" data-toggle="modal" role="button">Add a jedi master</a>
+        </div><br />
+        <div id="addUserFromGroup" class="modal in" tabindex="-1" role="dialog" style="text-align:center;" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title" id="myModalLabel">Add a jedi master</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div style="text-align:left;">
+                            <p><strong>You can search by username or email</strong></p>
+                        </div>
+                        <div class="form-group input-group col-sm-12">
+                            <label class="control-label col-sm-2" style="line-height: 200%;">Search : </label>
+                            <div class="col-sm-10">
+                                <input id="searchInput" list="inputDataList" type="text" value="" class="form-control" />
+                                <datalist id="inputDataList">
+                                    <option selected>
+                                </datalist>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" id="foot">
+                        <button id="addingButton" type="button" class="btn btn-primary">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-12 panel panel-default">
+        <div class="panel-heading">
+            <h1 class="panel-title" align="center"><b>Members</b><br/>
+                Login & email</h1>
+        </div>
+        <div class="panel-body">
+            <div class="col-sm-1">
+
+            </div>
+            <div class="row col-sm-10">
+                <table id="table_id" class="display" width="100%">
+                    <thead>
+                        <tr>
+                            <th>
+
+                            </th>
+                            <th>
+                                User
+                            </th>
+                            <!--<th>-->
+                                <!--Email-->
+                            <!--</th>-->
+
+                        </tr>
+                    </thead>
+                    <tbody id="users_table">
+                    </tbody>
+                </table>
+            </div>
+		</div>
+    </div>
+</div>
+{% endblock %}

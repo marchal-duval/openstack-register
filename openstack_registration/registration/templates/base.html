@@ -33,10 +33,22 @@
                             $.getJSON('/isGroupAdmin').done(
                                 function (json) {
                                     if (json.status == 'False') {
+                                        $('#isGroupAdmin').html('');
+                                    }
+                                    else {
+                                        $('#isGroupAdmin').html('<a href="/groupAdmin">Manage Group</a>');
+                                    }
+                                }
+                            );
+
+                            $.getJSON('/isAdmin').done(
+                                function (json) {
+                                    if (json.admin == 'False') {
                                         $('#isAdmin').html('');
                                     }
                                     else {
-                                        $('#isAdmin').html('<a href="/groupAdmin">Manage Group</a>');
+                                        $('#isAdmin').html('<a href="/admin">Admin</a>');
+                                        $('#isGroupAdmin').html('<a href="/groupAdmin">Manage Group</a>');
                                     }
                                 }
                             );
@@ -70,6 +82,9 @@
                          </li>
                          <li>
                              <a href="https://cloud-support.lal.in2p3.fr/" type="button" target="_blank">Support</a>
+                         </li>
+                         <li id="isGroupAdmin">
+
                          </li>
                          <li id="isAdmin">
 

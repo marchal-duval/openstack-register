@@ -167,7 +167,6 @@ def send_mail(username,
     header['To'] = user_email
     header['Subject'] = 'OpenStack Registration Message'
 
-
     if action == 'add':
         all_rcpt = user_email
         random_string = uuid.uuid4()
@@ -214,6 +213,7 @@ def send_mail(username,
 
 def add_entry_user_activation(random_string,
                               user):
+
     new_user = UserActivation(link=random_string, username=user)
     new_user.save()
 
@@ -222,3 +222,16 @@ def add_entry_user_info(user,
                         date):
     new_user = UserInfo(username=user, last_agreement=date, enabled=True)
     new_user.save()
+
+
+def update_entry_user_info(user,
+                           value):
+    data = {}
+    try:
+        existing_user = UserInfo.objects.filter(username=user)
+        # existing_user[0].admin = value
+        existing_user.update(admin=value)
+        data['status'] = 'True'
+    except:
+        data['status'] = 'False'
+    return data

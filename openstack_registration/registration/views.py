@@ -26,6 +26,110 @@ def user_is_authenticate(request):
     return JsonResponse(data)
 
 
+@login_required()
+def user_is_admin(request,
+                  spec=None):
+    """
+
+    :param request:
+    :return:
+    """
+    data = {}
+    data['admin'] = 'False'
+    user = UserInfo.objects.filter(username=request.user)
+
+
+    if spec == 'dataTable':
+        data['list'] = {}
+        final_list = []
+        admin = UserInfo.objects.filter(admin=True)
+
+        for each in admin:
+            tmp = {}
+            username = each.username
+            tmp['uid'] = username
+            tmp['icon'] = ''
+            final_list.append(tmp)
+
+        data['list'] = final_list
+        return JsonResponse(data)
+
+    if user:
+        is_admin = user[0].admin
+        if is_admin == True:
+            data['admin'] = 'True'
+    if spec == 'python':
+        return data
+    else:
+        return JsonResponse(data)
+
+
+@login_required()
+def admin_dispatcher(request):
+    """
+
+    :param request:
+    :return:
+    """
+    if user_is_admin(request, spec='python')['admin'] != 'False':
+        if request.method == 'GET':
+            if 'format' in request.GET\
+                and 'email' in request.GET\
+                and request.GET['format'] == 'json'\
+                and request.GET['email'] == 'bar':
+                return user_get_json(request)
+            elif 'format' in request.GET\
+                and 'spec' in request.GET\
+                and request.GET['format'] == 'json'\
+                and request.GET['spec'] == 'dataTable':
+                return user_is_admin(request, spec='dataTable')
+            else:
+                return admin_get_html(request)
+        elif request.method == 'PUT':
+            return admin_put_json(request)
+    else:
+        return redirect('/')
+
+
+@login_required()
+def admin_put_json(request):
+    """
+
+    :param request:
+    :return:
+    """
+    data = QueryDict(request.body).dict()
+    user = data['user']
+    action = data['action']
+
+    if action == 'add':
+        value = True
+    else:
+        value = False
+        print type(request.user)
+        print type(user)
+
+        if str(request.user) == str(user):
+            data['status'] = "itself"
+            return JsonResponse(data)
+    result = update_entry_user_info(user, value)
+    return JsonResponse(result)
+
+
+@login_required()
+def admin_get_html(request):
+    """
+
+    :param request:
+    :return:
+    """
+    if user_is_admin(request, spec='python')['admin'] != 'False':
+        return render(request, "admin.html")
+    else:
+        return redirect('/')
+
+
+@login_required()
 def user_is_group_admin(request,
                         type=None):
     """
@@ -43,21 +147,26 @@ def user_is_group_admin(request,
     # print IsAdmin.objects.filter(group__group_name="test-admin2")
     # print IsAdmin.objects.get(group=)
     # print IsAdmin.objects.filter(group__group_name="test-admin2")[0].administrators
-    is_admin = GroupInfo.objects.filter(administrators__username=request.user)
+
     if request.path_info.split('/')[1] == 'groupAdmin':
         location = request.path_info.split('/')[2]
         user_admin = IsAdmin.objects.filter(group__group_name=location)
 
-    if is_admin:
-        for each in is_admin:
-            group_list.append(str(each.group_name))
-        if user_admin:
-            for each in user_admin:
-                user_list.append(str(each.administrators))
-            data['user'] = user_list
-        data['admin'] = group_list
+    if user_is_admin(request, spec='python')['admin'] != 'False':
         data['status'] = 'True'
+        data['admin'] = ['*']
 
+    else:
+        is_admin = GroupInfo.objects.filter(administrators__username=request.user)
+        if is_admin:
+            for each in is_admin:
+                group_list.append(str(each.group_name))
+            if user_admin:
+                for each in user_admin:
+                    user_list.append(str(each.administrators))
+                data['user'] = user_list
+            data['admin'] = group_list
+            data['status'] = 'True'
 
     if type == 'python':
         return data
@@ -91,6 +200,7 @@ def login(request):
             return render(request, "login.html")
 
 
+@login_required()
 def logout(request):
     """
     Logout user and redirect to login page
@@ -157,26 +267,30 @@ def group_dispatcher(request):
             and 'email' in request.GET\
             and request.GET['format'] == 'json'\
             and request.GET['email'] == 'bar'\
-            and user_is_group_admin(request, type='python')['admin'] != 'False'\
-            and request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin']:
+            and ((user_is_group_admin(request, type='python')['admin'] != 'False'
+                and request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin'])
+                or user_is_admin(request, spec='python')['admin'] != 'False'):
         return user_get_json(request)
 
     elif request.method == 'GET'\
             and 'format' in request.GET\
             and request.GET['format'] == 'json'\
-            and user_is_group_admin(request, type='python')['admin'] != 'False'\
-            and request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin']:
+            and ((user_is_group_admin(request, type='python')['admin'] != 'False'
+            and request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin'])
+                or user_is_admin(request, spec='python')['admin'] != 'False'):
         return group_get_json(request)
 
     elif request.method == 'GET'\
-            and user_is_group_admin(request, type='python')['admin'] != 'False'\
-            and request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin']:
+            and ((user_is_group_admin(request, type='python')['admin'] != 'False'
+            and request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin'])
+                or user_is_admin(request, spec='python')['admin'] != 'False'):
         return group_get_html(request)
 
     elif request.method == 'GET'\
             and 'admin' in request.GET\
-            and user_is_group_admin(request, type='python')['admin'] != 'False'\
-            and request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin']:
+            and ((user_is_group_admin(request, type='python')['admin'] != 'False'
+            and request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin'])
+                or user_is_admin(request, spec='python')['admin'] != 'False'):
         return group_get_json(request)
 
     elif request.method == 'DEL'\
@@ -187,14 +301,14 @@ def group_dispatcher(request):
     elif request.method == 'PUT'\
         and user_is_group_admin(request, type='python')['admin'] != 'False'\
         and request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin']:
-        return group_add_json(request)
+        return group_put_json(request)
 
     else:
         return redirect('/')
 
 
 @login_required()
-def group_add_json(request):
+def group_put_json(request):
     """
 
     :param request:
@@ -261,7 +375,7 @@ def group_get_json(request):
     else:
         attrs = ldap.search_group(request.path_info.split('/')[2])
         data['attrs'] = {}
-
+        print attrs
         for key, value in attrs:
             for each in value:
                 data['attrs'][each] = value[each]
