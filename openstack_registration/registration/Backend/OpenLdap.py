@@ -156,6 +156,12 @@ class OpenLdap(PrototypeBackend):
                                             .format(password),
                                             ['userPassword'])
 
+    def search_groups(self):
+        return self.connection.search_s('ou=groups,o=cloud',
+                                        ldap.SCOPE_SUBTREE,
+                                        "(&(objectClass=groupOfUniqueNames)(cn=*))",
+                                        ['cn'])
+
     def search_group(self,
                      uid):
         return self.connection.search_s('ou=groups,o=cloud',

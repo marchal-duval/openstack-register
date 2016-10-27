@@ -241,7 +241,12 @@ def groups_dispatcher(request):
     :param request:
     :return:
     """
-    if request.method == 'GET'\
+    if user_is_admin(request, spec='python')['admin'] != 'False'\
+            and 'format' in request.GET\
+            and request.GET['format'] == 'json':
+        return groups_get_json(request, spec='all')
+
+    elif request.method == 'GET'\
             and 'format' in request.GET\
             and request.GET['format'] == 'json'\
             and user_is_group_admin(request, type='python')['admin'] != 'False':
@@ -294,13 +299,15 @@ def group_dispatcher(request):
         return group_get_json(request)
 
     elif request.method == 'DEL'\
-            and user_is_group_admin(request, type='python')['admin'] != 'False'\
-            and request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin']:
+            and ((user_is_group_admin(request, type='python')['admin'] != 'False'\
+            and request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin'])
+                or user_is_admin(request, spec='python')['admin'] != 'False'):
         return group_del_json(request)
 
     elif request.method == 'PUT'\
-        and user_is_group_admin(request, type='python')['admin'] != 'False'\
-        and request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin']:
+        and ((user_is_group_admin(request, type='python')['admin'] != 'False'
+        and request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin'])
+            or user_is_admin(request, spec='python')['admin'] != 'False'):
         return group_put_json(request)
 
     else:
@@ -489,13 +496,26 @@ def groups_get_html(request):
 
 
 @login_required()
-def groups_get_json(request):
-    data = {}
-    is_admin = user_is_group_admin(request, type='python')
-    groups = []
-    for each in is_admin['admin']:
-        groups.append(each)
+def groups_get_json(request,
+                    spec=None):
+    """
 
+    :param request:
+    :param spec:
+    :return:
+    """
+    data = {}
+    groups = []
+
+    if spec is not None:
+        ldap = OpenLdap(GLOBAL_CONFIG)
+        groups_value = ldap.search_groups()
+        for each in groups_value:
+            groups.append(each[1]['cn'][0])
+    else:
+        is_admin = user_is_group_admin(request, type='python')
+        for each in is_admin['admin']:
+            groups.append(each)
     data['groups'] = groups
     return JsonResponse(data)
 

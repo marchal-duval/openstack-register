@@ -10,6 +10,11 @@ $(document).ready(function() {
     $('#addingButton').click(function() {
         addSuperAdmin( $('#searchInput').val(), 'add');
     });
+
+    $('body').attr('style', "background: url('/static/fonts/test.jpg'); background-size: 100%; color: #888;");
+    <!--$('.dataTables_wrapper').css("background-image", "url('http://www.wall321.com/thumbnails/detail/20120304/star%20wars%20galaxies%20death%20star%201920x1200%20wallpaper_www.wall321.com_15.jpg')");-->
+
+    $("img[src$='openstack-lal-s-vertical.png']").attr('src', '');
 });
 
 function sortOnKeys(dict) {
@@ -64,9 +69,9 @@ function get_admin() {
         ],
         order: [[ 0, 'desc' ]],
         iDisplayLength: 10,
-        drawCallback: function (settings) {
-            colorLine();
-        },
+        <!--drawCallback: function (settings) {-->
+            <!--colorLine();-->
+        <!--},-->
         lengthMenu: [ [5, 10, 25, 50, -1], [5, 10, 25, 50, "ALL"] ],
     });
 }
@@ -121,7 +126,8 @@ function removeSuperAdmin(user, action) {
         success: function(json) {
             $("#table_id").DataTable().ajax.reload();
             if (json.status == 'itself') {
-                alert('You are trying to delete yourself !');
+                <!--alert('Delete yourself you must not ! A padawan you are not');-->
+                $("#alert").modal('show');
             }
         }
     });
@@ -173,7 +179,7 @@ function removeSuperAdmin(user, action) {
             <h1 class="panel-title" align="center"><b>Members</b><br/>
                 Login & email</h1>
         </div>
-        <div class="panel-body">
+        <div class="panel-body"style="background: url('/static/fonts/test.jpg');">
             <div class="col-sm-1">
 
             </div>
@@ -199,5 +205,10 @@ function removeSuperAdmin(user, action) {
             </div>
 		</div>
     </div>
+</div>
+
+<div id="alert" class="modal in" tabindex="-1" role="dialog" style="text-align:center;" aria-hidden="true">
+    <img align="center" src="/static/fonts/yoda.jpg" style="vertical-align: middle;">
+    <h1 style="color: #00ff00;"><strong>Delete yourself you must not ! A padawan you are not...</strong></h1>
 </div>
 {% endblock %}
