@@ -106,8 +106,6 @@ def admin_put_json(request):
         value = True
     else:
         value = False
-        print type(request.user)
-        print type(user)
 
         if str(request.user) == str(user):
             data['status'] = "itself"
@@ -382,7 +380,7 @@ def group_get_json(request):
     else:
         attrs = ldap.search_group(request.path_info.split('/')[2])
         data['attrs'] = {}
-        print attrs
+
         for key, value in attrs:
             for each in value:
                 data['attrs'][each] = value[each]
@@ -434,8 +432,8 @@ def user_get_json(request,
     if spec is not None:
         for uid in spec:
             attrs = ldap.search_user(attributes=str(uid).split('=')[1].split(',')[0])
-            members.append(attrs[0][1])
-
+            if attrs != []:
+                members.append(attrs[0][1])
         for each in members:
             tmp = each
             for key in tmp:
