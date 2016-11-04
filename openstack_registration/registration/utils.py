@@ -235,3 +235,15 @@ def update_entry_user_info(user,
     except:
         data['status'] = 'False'
     return data
+
+def update_count_force(user,
+                       action):
+    try:
+        existing_user = UserInfo.objects.filter(username=user)
+        if action == 'add':
+            value = existing_user[0].countForce + 1
+        else:
+            value = existing_user[0].countForce - 1
+        existing_user.update(countForce=value)
+    except:
+        pass

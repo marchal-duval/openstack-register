@@ -4,18 +4,70 @@
 {% block title %}OpenStack - Super admin{% endblock %}
 
 {% block javascript %}
+var theme = 'default';
 $(document).ready(function() {
+
     getDataListUsers();
     get_admin();
+    get_counter();
+
     $('#addingButton').click(function() {
         addSuperAdmin( $('#searchInput').val(), 'add');
     });
 
-    $('body').attr('style', "background: url('/static/fonts/test.jpg'); background-size: 100%; color: #888;");
-    <!--$('.dataTables_wrapper').css("background-image", "url('http://www.wall321.com/thumbnails/detail/20120304/star%20wars%20galaxies%20death%20star%201920x1200%20wallpaper_www.wall321.com_15.jpg')");-->
+    //light saber
+    $(".slidingDiv").hide();
+    $(".show_hide").show();
+    $(".slidingDiv").slideToggle();
+    $('.show_hide').click(function(){
+        $(".slidingDiv").slideToggle();
+    });
 
-    $("img[src$='openstack-lal-s-vertical.png']").attr('src', '');
+    $('#show_hide_special').click(function() {
+        if (theme == 'default') {
+            theme = 'special';
+        }
+        else {
+            theme = 'default';
+        }
+        show_special_theme(theme);
+    });
 });
+
+function show_special_theme(status) {
+    $("#table_id").DataTable().ajax.reload();
+    if (status == 'special') {
+        $('#meta').html('<link href="/static/css/lightSaber.css" rel="stylesheet" media="screen">');
+        $('#show_hide_special').attr('style', 'color: #888;');
+        $('#addUserButton').text('Add a jedi master');
+
+        //alert
+        $('#alert').html('<img align="center" src="/static/fonts/yoda.jpg" style="vertical-align: middle;"><h1 style="color: #00ff00;"><strong>Delete yourself you must not ! A padawan you are not...</strong></h1>');
+
+        //image and background
+        $('body').attr('style', "background: url('/static/fonts/test.jpg'); background-size: 100%; color: #888;");
+        <!--$('.dataTables_wrapper').css("background-image", "url('http://www.wall321.com/thumbnails/detail/20120304/star%20wars%20galaxies%20death%20star%201920x1200%20wallpaper_www.wall321.com_15.jpg')");-->
+        $('#lateral').attr('src', '');
+        //
+
+        $('#h2special').removeAttr('hidden');
+        $('.panel-body').attr('style', "background: url('/static/fonts/test.jpg');");
+        $('body').css('cursor', 'crosshair');
+        <!--$("#table_id").DataTable().ajax.reload();-->
+        <!--get_counter();-->
+    }
+    else {
+        $('#meta').html('');
+        $('#show_hide_special').attr('style', 'color: #333;');
+        $('#addUserButton').text('Add a super admin');
+        $('#alert').html('<h1 style="color: red;"><strong>You can not delete yourself !</strong> *</h1><p style="color: red;">* click anywhere except these lines to hide this message</p>');
+        $('#lateral').attr('src', '/static/fonts/openstack-lal-s-vertical.png');
+        $('body').attr('style', 'background-color: #fff;');
+        $('#h2special').attr('hidden', '');
+        $('body').css('cursor', '');
+        $('.panel-body').attr('style', "background: '';");
+    }
+}
 
 function sortOnKeys(dict) {
     var sorted = [];
@@ -50,6 +102,49 @@ function getDataListUsers() {
     );
 }
 
+function get_counter() {
+    $.ajaxSetup({
+        beforeSend : function(xhr) {
+            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}" );
+        }
+    });
+    $.ajax({
+        url: location.pathname,
+        type: 'GET',
+        data: { 'format': 'json' },
+        success: function(json) {
+            if (json.counter > 0) {
+                <!--$('#lightmain').attr('style', 'background: linear-gradient(to right, blue saberHeight,rgba(255,255,255,1) 54%,blue 100%); box-shadow: 0 1px 24px blue');-->
+                saberHeight = 100 - ( 100 - json.counter);
+                if ( saberHeight > 100 ) {
+                    saberHeight = 100;
+                }
+                saberHeight = saberHeight + '%';
+
+                color = 'background: linear-gradient(to right, blue 0%,rgba(255,255,255,1) 54%,blue 100%); box-shadow: 0 1px 24px blue';
+                <!--console.log(saberHeight);-->
+
+                <!--$('#lightmain').css({'background': saberHeight});-->
+                $('#lightmain').attr('style', color);
+                $('#lightmain').css({ 'height': saberHeight });
+            }
+            else if (json.counter < 0) {
+                saberHeight = 100 - ( 100 - ( json.counter * -1 ));
+                if ( saberHeight > 100 ) {
+                    saberHeight = 100;
+                }
+                saberHeight = saberHeight + '%';
+                $('#lightmain').css({ 'height': saberHeight });
+                <!--console.log("-");-->
+            }
+            else if (json.counter == 0) {
+                <!--console.log("neutral");-->
+                <!--$('#lightmain').attr('style', 'background: linear-gradient(to right, white 0%,rgba(255,255,255,1) 54%,white 100%); box-shadow: 0 1px 24px white');-->
+            }
+        }
+    });
+}
+
 function get_admin() {
     $("#table_id").DataTable( {
         ajax: {
@@ -69,9 +164,11 @@ function get_admin() {
         ],
         order: [[ 0, 'desc' ]],
         iDisplayLength: 10,
-        <!--drawCallback: function (settings) {-->
-            <!--colorLine();-->
-        <!--},-->
+        drawCallback: function (settings) {
+            if ( theme == 'default') {
+                colorLine();
+            }
+        },
         lengthMenu: [ [5, 10, 25, 50, -1], [5, 10, 25, 50, "ALL"] ],
     });
 }
@@ -92,7 +189,7 @@ function colorLine () {
 }
 
 function addSuperAdmin(user, action) {
-$.ajaxSetup({
+    $.ajaxSetup({
         beforeSend : function(xhr) {
             xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}" );
         }
@@ -134,15 +231,37 @@ function removeSuperAdmin(user, action) {
 }
 
 {% endblock %}
+
+{% block css %}
+<!--<link href="/static/css/lightSaber.css" rel="stylesheet" media="screen">-->
+{% endblock %}
+
+{% block lateral %}
+<div id="lightsaber" class="purple">
+    <div id="handle">
+        <div id="handle-top"></div>
+        <div id="handle-button"><a href="#" class="show_hide"></a></div>
+        <div id="handle-middle"></div>
+        <div id="handle-bottom"></div>
+    </div>
+    <div class="slidingDiv">
+        <div id="light">
+            <div id="lightcap"></div>
+            <div id="lightmain"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
 {% block content %}
 <div>
-    <h1>Here you are on super admin page</h1>
-    <h2>May the force be with you ! (be careful about the dark side you are a jedi master; not a padawan)</h2>
+    <h1>Here you are on <a id="show_hide_special" style="color: #333;">super</a> admin page</h1>
+    <h2 id="h2special" hidden>May the force be with you ! (be careful about the dark side you are a jedi master; not a padawan)</h2>
     </br>
 
     <div class="col-sm-12">
         <div>
-            <a href="#addUserFromGroup" id="addUserButton" type="button" class="btn btn-primary" data-toggle="modal" role="button">Add a jedi master</a>
+            <a href="#addUserFromGroup" id="addUserButton" type="button" class="btn btn-primary" data-toggle="modal" role="button">Add a super admin</a>
         </div><br />
         <div id="addUserFromGroup" class="modal in" tabindex="-1" role="dialog" style="text-align:center;" aria-hidden="true">
             <div class="modal-dialog">
@@ -179,7 +298,7 @@ function removeSuperAdmin(user, action) {
             <h1 class="panel-title" align="center"><b>Members</b><br/>
                 Login & email</h1>
         </div>
-        <div class="panel-body"style="background: url('/static/fonts/test.jpg');">
+        <div class="panel-body">
             <div class="col-sm-1">
 
             </div>
@@ -208,7 +327,9 @@ function removeSuperAdmin(user, action) {
 </div>
 
 <div id="alert" class="modal in" tabindex="-1" role="dialog" style="text-align:center;" aria-hidden="true">
-    <img align="center" src="/static/fonts/yoda.jpg" style="vertical-align: middle;">
-    <h1 style="color: #00ff00;"><strong>Delete yourself you must not ! A padawan you are not...</strong></h1>
+    <!--<img align="center" src="/static/fonts/yoda.jpg" style="vertical-align: middle;">-->
+    <!--<h1 style="color: #00ff00;"><strong>Delete yourself you must not ! A padawan you are not...</strong></h1>-->
+    <h1 style="color: red;"><strong>You can not delete yourself !</strong> *</h1>
+    <p style="color: red;">* click anywhere except these lines to hide this message</p>
 </div>
 {% endblock %}

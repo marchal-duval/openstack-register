@@ -83,12 +83,29 @@ def admin_dispatcher(request):
                 and request.GET['format'] == 'json'\
                 and request.GET['spec'] == 'dataTable':
                 return user_is_admin(request, spec='dataTable')
+            elif 'format' in request.GET\
+                and request.GET['format'] == 'json':
+                return admin_get_json(request)
             else:
                 return admin_get_html(request)
         elif request.method == 'PUT':
             return admin_put_json(request)
     else:
         return redirect('/')
+
+
+@login_required()
+def admin_get_json(request):
+    """
+
+    :param request:
+    :return:
+    """
+    data = {}
+    user = UserInfo.objects.filter(username=str(request.user))
+    counter = user[0].countForce
+    data['counter'] = counter
+    return JsonResponse(data)
 
 
 @login_required()
@@ -104,8 +121,10 @@ def admin_put_json(request):
 
     if action == 'add':
         value = True
+        update_count_force(request.user, 'add')
     else:
         value = False
+        update_count_force(request.user, 'remove')
 
         if str(request.user) == str(user):
             data['status'] = "itself"
@@ -329,6 +348,8 @@ def group_put_json(request):
 
     if info:
         status = "True"
+        if user_is_admin(request, spec='python')['admin'] != 'False':
+            update_count_force(request.user, 'add')
     else:
         status = "False"
     data['status'] = status
@@ -352,6 +373,8 @@ def group_del_json(request):
 
     if info:
         status = "True"
+        if user_is_admin(request, spec='python')['admin'] != 'False':
+            update_count_force(request.user, 'remove')
     else:
         status = "False"
     data['status'] = status

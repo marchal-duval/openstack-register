@@ -16,6 +16,7 @@ class UserInfo(models.Model):
     last_agreement = models.DateField(auto_now_add=False, auto_now=False)
     enabled = models.BooleanField(default=False)
     admin = models.BooleanField(default=False)
+    countForce = models.IntegerField(default=0)
     # group = models.CharField(max_length=32, null=False, default='')
 
     def __unicode__(self):
