@@ -15,6 +15,10 @@ $(document).ready(function() {
         addSuperAdmin( $('#searchInput').val(), 'add');
     });
 
+    $('#addingGroupButton').click(function() {
+        addGroup();
+    });
+
     //light saber
     $(".slidingDiv").hide();
     $(".show_hide").show();
@@ -230,6 +234,25 @@ function removeSuperAdmin(user, action) {
     });
 }
 
+function addGroup() {
+    $.ajaxSetup({
+        beforeSend : function(xhr) {
+            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}" );
+        }
+    });
+    $.ajax({
+        url: location.pathname,
+        type: 'POST',
+        data: { 'format': 'json',
+                'group': $('#groupInput').val()
+        },
+        success: function(json) {
+
+        }
+    });
+
+}
+
 {% endblock %}
 
 {% block css %}
@@ -257,11 +280,16 @@ function removeSuperAdmin(user, action) {
 <div>
     <h1>Here you are on <a id="show_hide_special" style="color: #333;">super</a> admin page</h1>
     <h2 id="h2special" hidden>May the force be with you ! (be careful about the dark side you are a jedi master; not a padawan)</h2>
-    </br>
+    <br />
 
     <div class="col-sm-12">
-        <div>
-            <a href="#addUserFromGroup" id="addUserButton" type="button" class="btn btn-primary" data-toggle="modal" role="button">Add a super admin</a>
+        <div class="row form-group">
+            <div class="col-sm-4">
+                <a href="#addUserFromGroup" id="addUserButton" type="button" class="btn btn-primary" data-toggle="modal" role="button">Add a super admin</a>
+            </div>
+            <div class="col-sm-4">
+                <a href="#addGroup" id="addGroupButton" type="button" class="btn btn-primary" data-toggle="modal" role="button">Add a group</a>
+            </div>
         </div><br />
         <div id="addUserFromGroup" class="modal in" tabindex="-1" role="dialog" style="text-align:center;" aria-hidden="true">
             <div class="modal-dialog">
@@ -288,6 +316,33 @@ function removeSuperAdmin(user, action) {
                     </div>
                     <div class="modal-footer" id="foot">
                         <button id="addingButton" type="button" class="btn btn-primary">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="addGroup" class="modal in" tabindex="-1" role="dialog" style="text-align:center;" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title" id="myModalLabe2">Add a group</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div style="text-align:left;">
+                            <p><strong>Type the name of the new group :</strong></p>
+                        </div>
+                        <div class="form-group input-group col-sm-12">
+                            <label class="control-label col-sm-2" style="line-height: 200%;">Group : </label>
+                            <div class="col-sm-10">
+                                <input id="groupInput" type="text" value="" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" id="footGroup">
+                        <button id="addingGroupButton" type="button" class="btn btn-primary">Add</button>
                     </div>
                 </div>
             </div>

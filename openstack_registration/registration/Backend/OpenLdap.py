@@ -121,6 +121,32 @@ class OpenLdap(PrototypeBackend):
         #     data['status'] = 'X500 DN failed'
         #     return data
 
+    def addGroup(self,
+                 group,
+                 user):
+        """
+
+        :param group:
+        :return:
+        """
+        attributes = []
+        dn_group = "cn={},ou=groups,o=cloud".format(str(group))
+        attrs = {
+            'objectClass': ['groupOfUniqueNames', 'top'],
+            'cn': "{}".format(str(group)),
+            'uniqueMember': "uid={},ou=users,o=cloud".format(str(user))
+            # 'description': ''
+        }
+
+        for value in attrs:
+            entry = (value, attrs[value])
+            attributes.append(entry)
+
+        # try:
+        self.connection.add_s(dn_group, attributes)
+        # except:
+        #     exit(1)
+
     def search_user(self,
                     uid=None,
                     mail=None,
