@@ -44,7 +44,7 @@ function show_special_theme(status) {
         $('#meta').html('<link href="/static/css/lightSaber.css" rel="stylesheet" media="screen">');
         $('#show_hide_special').attr('style', 'color: #888;');
         $('#addUserButton').text('Add a jedi master');
-
+        $('#myModalLabel').text('Add a jedi master');
         //alert
         $('#alert').html('<img align="center" src="/static/fonts/yoda.jpg" style="vertical-align: middle;"><h1 style="color: #00ff00;"><strong>Delete yourself you must not ! A padawan you are not...</strong></h1>');
 
@@ -64,6 +64,7 @@ function show_special_theme(status) {
         $('#meta').html('');
         $('#show_hide_special').attr('style', 'color: #333;');
         $('#addUserButton').text('Add a super admin');
+        $('#myModalLabel').text('Add a super admin');
         $('#alert').html('<h1 style="color: red;"><strong>You can not delete yourself !</strong> *</h1><p style="color: red;">* click anywhere except these lines to hide this message</p>');
         $('#lateral').attr('src', '/static/fonts/openstack-lal-s-vertical.png');
         $('body').attr('style', 'background-color: #fff;');
@@ -298,7 +299,7 @@ function addGroup() {
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
-                        <h4 class="modal-title" id="myModalLabel">Add a jedi master</h4>
+                        <h4 class="modal-title" id="myModalLabel">Add a super admin</h4>
                     </div>
                     <div class="modal-body">
                         <div style="text-align:left;">
@@ -322,31 +323,31 @@ function addGroup() {
         </div>
     </div>
     <div id="addGroup" class="modal in" tabindex="-1" role="dialog" style="text-align:center;" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                        <h4 class="modal-title" id="myModalLabe2">Add a group</h4>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="myModalLabe2">Add a group</h4>
+                </div>
+                <div class="modal-body">
+                    <div style="text-align:left;">
+                        <p><strong>Type the name of the new group :</strong></p>
                     </div>
-                    <div class="modal-body">
-                        <div style="text-align:left;">
-                            <p><strong>Type the name of the new group :</strong></p>
+                    <div class="form-group input-group col-sm-12">
+                        <label class="control-label col-sm-2" style="line-height: 200%;">Group : </label>
+                        <div class="col-sm-10">
+                            <input id="groupInput" type="text" value="" class="form-control" />
                         </div>
-                        <div class="form-group input-group col-sm-12">
-                            <label class="control-label col-sm-2" style="line-height: 200%;">Group : </label>
-                            <div class="col-sm-10">
-                                <input id="groupInput" type="text" value="" class="form-control" />
-                            </div>
-                        </div>
                     </div>
-                    <div class="modal-footer" id="footGroup">
-                        <button id="addingGroupButton" type="button" class="btn btn-primary">Add</button>
-                    </div>
+                </div>
+                <div class="modal-footer" id="footGroup">
+                    <button id="addingGroupButton" type="button" class="btn btn-primary">Add</button>
                 </div>
             </div>
         </div>
+        <!--</div>-->
     </div>
     <div class="col-sm-12 panel panel-default">
         <div class="panel-heading">

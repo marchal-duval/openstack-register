@@ -212,6 +212,26 @@ def user_is_group_admin(request,
         return JsonResponse(data)
 
 
+@login_required()
+def modify_group_admin(request,
+                       user,
+                       group,
+                       action):
+    data = {}
+    data['status'] = 'false'
+    if user_is_admin(request, spec='python')['admin'] != 'False':
+        if action == 'add':
+            add_entry_is_admin(user, group)
+            data['action'] = 'added'
+            data['status'] = 'true'
+        else:
+            del_entry_is_admin(user, group)
+            data['action'] = 'deleted'
+            data['status'] = 'true'
+
+    return JsonResponse(data)
+
+
 def login(request):
     """
 
@@ -279,10 +299,19 @@ def groups_dispatcher(request):
     :param request:
     :return:
     """
-    if user_is_admin(request, spec='python')['admin'] != 'False'\
-            and 'format' in request.GET\
-            and request.GET['format'] == 'json':
-        return groups_get_json(request, spec='all')
+    if user_is_admin(request, spec='python')['admin'] != 'False':
+        if request.method == 'PUT':
+            data = QueryDict(request.body).dict()
+            user = data['user']
+            group = data['group']
+            action = data['action']
+            return modify_group_admin(request, user, group, action)
+        elif request.method == 'GET'\
+                and 'format' in request.GET\
+                and request.GET['format'] == 'json':
+            return groups_get_json(request, spec='all')
+        else:
+            return groups_get_html(request)
 
     elif request.method == 'GET'\
             and 'format' in request.GET\

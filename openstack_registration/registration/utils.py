@@ -11,7 +11,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import uuid
-from models import UserActivation, UserInfo
+from models import UserActivation, UserInfo, GroupInfo, IsAdmin
 from datetime import datetime
 
 
@@ -222,6 +222,26 @@ def add_entry_user_info(user,
                         date):
     new_user = UserInfo(username=user, last_agreement=date, enabled=True)
     new_user.save()
+
+
+def add_entry_is_admin(user,
+                      group):
+    user_id = UserInfo.objects.filter(username=user)[0].id
+    exist_user = UserInfo.objects.get(id=user_id)
+    group_id = GroupInfo.objects.filter(group_name=group)[0].id
+    exist_group = GroupInfo.objects.get(id=group_id)
+    new_admin = IsAdmin(administrators=exist_user, group=exist_group)
+    new_admin.save()
+
+
+def del_entry_is_admin(user,
+                       group):
+    user_id = UserInfo.objects.filter(username=user)[0].id
+    exist_user = UserInfo.objects.get(id=user_id)
+    group_id = GroupInfo.objects.filter(group_name=group)[0].id
+    exist_group = GroupInfo.objects.get(id=group_id)
+    admin = IsAdmin.objects.filter(administrators=exist_user, group=exist_group)
+    admin.delete()
 
 
 def update_entry_user_info(user,
