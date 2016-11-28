@@ -220,7 +220,10 @@ def modify_group_admin(request,
                        action):
     data = {}
     data['status'] = 'false'
-    if user_is_admin(request, spec='python')['admin'] != 'False':
+    if (user_is_admin(request, spec='python')['admin'] != 'False'
+            or (user_is_group_admin(request, type='python')['admin'] != 'False'
+            and request.META['HTTP_REFERER'].split('/')[4] in user_is_group_admin(request, type='python')['admin'])):
+
         if action == 'add':
             add_entry_is_admin(user, group)
             data['action'] = 'added'
@@ -300,7 +303,11 @@ def groups_dispatcher(request):
     :param request:
     :return:
     """
-    if user_is_admin(request, spec='python')['admin'] != 'False':
+    if (user_is_admin(request, spec='python')['admin'] != 'False'
+            or (user_is_group_admin(request, type='python')['admin'] != 'False'
+                and (request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin']
+                    or (len(request.META['HTTP_REFERER'].split('/')) == 5
+                        and request.META['HTTP_REFERER'].split('/')[4] in user_is_group_admin(request, type='python')['admin'])))):
         if request.method == 'PUT':
             data = QueryDict(request.body).dict()
             user = data['user']
@@ -367,7 +374,7 @@ def group_dispatcher(request):
         return group_get_json(request)
 
     elif request.method == 'DEL'\
-            and ((user_is_group_admin(request, type='python')['admin'] != 'False'\
+            and ((user_is_group_admin(request, type='python')['admin'] != 'False'
             and request.path_info.split('/')[2] in user_is_group_admin(request, type='python')['admin'])
                 or user_is_admin(request, spec='python')['admin'] != 'False'):
         return group_del_json(request)
