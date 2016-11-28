@@ -130,7 +130,12 @@ function removeUserFromGroup(user, action) {
                 'action': action
         },
         success: function(json) {
-            $("#table_id").DataTable().ajax.reload();
+            if (json.status == 'itself') {
+                alert("You can't deleting yourself !")
+            }
+            else {
+                $("#table_id").DataTable().ajax.reload();
+            }
         }
     });
 }

@@ -417,19 +417,24 @@ def group_del_json(request):
     ldap = OpenLdap(GLOBAL_CONFIG)
     data = QueryDict(request.body).dict()
     user = data['user']
-    group = request.path_info.split('/')[2]
-    dn_user = ldap.search_user(uid=user)[0][0]
-    dn_group = ldap.search_group(group)[0][0]
-    info = ldap.delete_user_from_group(dn_user, dn_group)
 
-    if info:
-        status = "True"
-        if user_is_admin(request, spec='python')['admin'] != 'False':
-            update_count_force(request.user, 'remove')
+    if str(request.user) == str(user):
+        data['status'] = 'itself'
+        return JsonResponse(data)
     else:
-        status = "False"
-    data['status'] = status
-    return JsonResponse(data)
+        group = request.path_info.split('/')[2]
+        dn_user = ldap.search_user(uid=user)[0][0]
+        dn_group = ldap.search_group(group)[0][0]
+        info = ldap.delete_user_from_group(dn_user, dn_group)
+
+        if info:
+            status = "True"
+            if user_is_admin(request, spec='python')['admin'] != 'False':
+                update_count_force(request.user, 'remove')
+        else:
+            status = "False"
+        data['status'] = status
+        return JsonResponse(data)
 
 
 @login_required()
