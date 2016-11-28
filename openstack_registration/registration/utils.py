@@ -224,6 +224,11 @@ def add_entry_user_info(user,
     new_user.save()
 
 
+def add_entry_group_info(group):
+    new_group = GroupInfo(group_name=group)
+    new_group.save()
+
+
 def add_entry_is_admin(user,
                       group):
     user_id = UserInfo.objects.filter(username=user)[0].id

@@ -123,6 +123,7 @@ def admin_post_json(request):
     attrs = {}
     # try:
     ldap.addGroup(group, request.user)
+    add_entry_group_info(group)
     #     attrs['status'] = 'success'
     # except:
     #     attrs['status'] = 'fail'
