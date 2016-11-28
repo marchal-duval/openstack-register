@@ -62,6 +62,8 @@ class OpenLdap(PrototypeBackend):
                                      [(ldap.MOD_ADD,
                                        'uniqueMember', dn_user)])
             ok = True
+        except ldap.TYPE_OR_VALUE_EXISTS:
+            return False
         except:
             print "Error while adding user " + dn_user + " from group " + dn_group
 

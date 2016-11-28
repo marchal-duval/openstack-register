@@ -435,20 +435,28 @@ def group_put_json(request):
     :param request:
     :return:
     """
+    status = "False"
     ldap = OpenLdap(GLOBAL_CONFIG)
     data = QueryDict(request.body).dict()
     user = data['user']
     group = request.path_info.split('/')[2]
-    dn_user = ldap.search_user(uid=user)[0][0]
-    dn_group = ldap.search_group(group)[0][0]
-    info = ldap.add_user_from_group(dn_user, dn_group)
 
-    if info:
-        status = "True"
-        if user_is_admin(request, spec='python')['admin'] != 'False':
-            update_count_force(request.user, 'add')
-    else:
-        status = "False"
+    try:
+        dn_user = ldap.search_user(uid=user)[0][0]
+        dn_group = ldap.search_group(group)[0][0]
+        info = ldap.add_user_from_group(dn_user, dn_group)
+
+        if info:
+            status = "True"
+            if user_is_admin(request, spec='python')['admin'] != 'False':
+                update_count_force(request.user, 'add')
+            else:
+                status = "False"
+        else:
+            status = "already"
+    except:
+        status = "not exist"
+
     data['status'] = status
     return JsonResponse(data)
 

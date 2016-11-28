@@ -14,6 +14,9 @@ $(document).ready(function() {
     $('#addingButton').click(function() {
         addUserFromGroup( $('#searchInput').val(), 'add');
     });
+    $('#searchInput').keypress( function() {
+        document.getElementById('errorAddingUser').innerHTML = '';
+    });
 });
 
 function sortOnKeys(dict) {
@@ -154,6 +157,12 @@ function addUserFromGroup(user, action) {
                 'action': action
         },
         success: function(json) {
+            if (json.status == "not exist") {
+                document.getElementById('errorAddingUser').innerHTML = "This user does not exist !";
+            }
+            else if (json.status == "already") {
+                document.getElementById('errorAddingUser').innerHTML = "This user is already member of this group !";
+            }
             $("#table_id").DataTable().ajax.reload();
         }
     });
@@ -273,6 +282,7 @@ function getAdminGroup() {
                             <!--</span>-->
                         </div>
                     </div>
+                    <p id="errorAddingUser" style="color: red;"></p>
                 </div>
                 <div class="modal-footer" id="foot">
                     <button id="addingButton" type="button" class="btn btn-primary">Add</button>
