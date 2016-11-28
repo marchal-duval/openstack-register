@@ -123,6 +123,7 @@ class OpenLdap(PrototypeBackend):
 
     def addGroup(self,
                  group,
+                 desc,
                  user):
         """
 
@@ -134,8 +135,8 @@ class OpenLdap(PrototypeBackend):
         attrs = {
             'objectClass': ['groupOfUniqueNames', 'top'],
             'cn': "{}".format(str(group)),
-            'uniqueMember': "uid={},ou=users,o=cloud".format(str(user))
-            # 'description': ''
+            'uniqueMember': "uid={},ou=users,o=cloud".format(str(user)),
+            'description': str(desc)
         }
 
         for value in attrs:

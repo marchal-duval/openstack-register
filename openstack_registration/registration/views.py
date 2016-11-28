@@ -134,6 +134,7 @@ def admin_post_json(request):
     """
     data = QueryDict(request.body).dict()
     group = data['group']
+    desc = data['desc']
     ldap = OpenLdap(GLOBAL_CONFIG)
     attrs = {}
 
@@ -143,7 +144,7 @@ def admin_post_json(request):
         attrs['status'] = 'already'
     else:
         try:
-            ldap.addGroup(group, request.user)
+            ldap.addGroup(group, desc, request.user)
             add_entry_group_info(group)
             attrs['status'] = 'success'
         except:

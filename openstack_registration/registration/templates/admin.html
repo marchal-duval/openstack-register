@@ -258,7 +258,8 @@ function addGroup() {
         url: location.pathname,
         type: 'POST',
         data: { 'format': 'json',
-                'group': $('#groupInput').val()
+                'group': $('#groupInput').val(),
+                'desc': $('#descInput').val(),
         },
         success: function(json) {
             if (json.status == 'already') {
@@ -352,9 +353,15 @@ function addGroup() {
                         <p><strong>Type the name of the new group :</strong></p>
                     </div>
                     <div class="form-group input-group col-sm-12">
-                        <label class="control-label col-sm-2" style="line-height: 200%;">Group : </label>
-                        <div class="col-sm-10">
+                        <label class="control-label col-sm-3" style="line-height: 200%;">Group : </label>
+                        <div class="col-sm-9">
                             <input id="groupInput" type="text" value="" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group input-group col-sm-12">
+                        <label class="control-label col-sm-3" style="line-height: 200%;">Description :</label>
+                        <div class="col-sm-9">
+                            <input id="descInput" type="text" value="" class="form-control" />
                         </div>
                     </div>
                     <p id="errorAddingGroup" style="color: red;"></p>
