@@ -19,6 +19,11 @@ $(document).ready(function() {
         addGroup();
     });
 
+    $('#searchInput, #groupInput').keypress( function() {
+        document.getElementById("errorAddingSuperAdmin").innerHTML = "";
+        document.getElementById("errorAddingGroup").innerHTML = "";
+    });
+
     //light saber
     $(".slidingDiv").hide();
     $(".show_hide").show();
@@ -207,7 +212,15 @@ function addSuperAdmin(user, action) {
                 'action': action
         },
         success: function(json) {
-            $("#table_id").DataTable().ajax.reload();
+            if (json.status == 'True') {
+                $("#table_id").DataTable().ajax.reload();
+            }
+            else if (json.status == 'already') {
+                document.getElementById("errorAddingSuperAdmin").innerHTML = "This user is already a Super Admin !";
+            }
+            else if (json.status == 'not exist') {
+                document.getElementById("errorAddingSuperAdmin").innerHTML = "This user does not exist !";
+            }
         }
     });
 }
@@ -248,7 +261,9 @@ function addGroup() {
                 'group': $('#groupInput').val()
         },
         success: function(json) {
-
+            if (json.status == 'already') {
+                document.getElementById('errorAddingGroup').innerHTML = "This group already exist !";
+            }
         }
     });
 
@@ -314,6 +329,7 @@ function addGroup() {
                                 </datalist>
                             </div>
                         </div>
+                        <p id="errorAddingSuperAdmin" style="color: red;"></p>
                     </div>
                     <div class="modal-footer" id="foot">
                         <button id="addingButton" type="button" class="btn btn-primary">Add</button>
@@ -341,6 +357,7 @@ function addGroup() {
                             <input id="groupInput" type="text" value="" class="form-control" />
                         </div>
                     </div>
+                    <p id="errorAddingGroup" style="color: red;"></p>
                 </div>
                 <div class="modal-footer" id="footGroup">
                     <button id="addingGroupButton" type="button" class="btn btn-primary">Add</button>

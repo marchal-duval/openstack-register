@@ -54,9 +54,24 @@ def user_is_admin(request,
         data['list'] = final_list
         return JsonResponse(data)
 
+    if spec == 'list':
+        data['list'] = {}
+        final_list = []
+        admin = UserInfo.objects.filter(admin=True)
+
+        for each in admin:
+            tmp = {}
+            username = each.username
+            tmp['uid'] = username
+            tmp['icon'] = ''
+            final_list.append(tmp)
+
+        data['list'] = final_list
+        return data
+
     if user:
         is_admin = user[0].admin
-        if is_admin == True:
+        if is_admin is True:
             data['admin'] = 'True'
     if spec == 'python':
         return data
@@ -121,12 +136,18 @@ def admin_post_json(request):
     group = data['group']
     ldap = OpenLdap(GLOBAL_CONFIG)
     attrs = {}
-    # try:
-    ldap.addGroup(group, request.user)
-    add_entry_group_info(group)
-    #     attrs['status'] = 'success'
-    # except:
-    #     attrs['status'] = 'fail'
+
+    exist = ldap.search_group(uid=group)
+
+    if exist != []:
+        attrs['status'] = 'already'
+    else:
+        try:
+            ldap.addGroup(group, request.user)
+            add_entry_group_info(group)
+            attrs['status'] = 'success'
+        except:
+            attrs['status'] = 'fail'
     return JsonResponse(attrs)
 
 
@@ -137,22 +158,39 @@ def admin_put_json(request):
     :param request:
     :return:
     """
+    ldap = OpenLdap(GLOBAL_CONFIG)
     data = QueryDict(request.body).dict()
     user = data['user']
     action = data['action']
+    result = {}
+    list_admin = []
 
-    if action == 'add':
-        value = True
-        update_count_force(request.user, 'add')
+    exist = ldap.search_user(uid=user)
+
+    if exist == []:
+        result['status'] = 'not exist'
+        return JsonResponse(result)
     else:
-        value = False
-        update_count_force(request.user, 'remove')
+        dict_admin = user_is_admin(request, spec='list')
+        for each in dict_admin['list']:
+            list_admin.append(each['uid'])
 
-        if str(request.user) == str(user):
-            data['status'] = "itself"
-            return JsonResponse(data)
-    result = update_entry_user_info(user, value)
-    return JsonResponse(result)
+        if str(user) in list_admin and action == 'add':
+            result['status'] = 'already'
+            return JsonResponse(result)
+        else:
+            if action == 'add':
+                value = True
+                update_count_force(request.user, 'add')
+            else:
+                value = False
+                update_count_force(request.user, 'remove')
+
+                if str(request.user) == str(user):
+                    data['status'] = "itself"
+                    return JsonResponse(data)
+            result = update_entry_user_info(user, value)
+            return JsonResponse(result)
 
 
 @login_required()
