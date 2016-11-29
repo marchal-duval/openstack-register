@@ -200,7 +200,12 @@ function modifyGroupAdmin(user, group, action) {
                 'action': action
         },
         success: function(json) {
-            $("#table_id").DataTable().ajax.reload();
+            if (json.status == 'itself') {
+                alert("You can't delete yourself !");
+            }
+            else {
+                $("#table_id").DataTable().ajax.reload();
+            }
         }
     });
 }

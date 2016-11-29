@@ -262,15 +262,20 @@ def modify_group_admin(request,
     if (user_is_admin(request, spec='python')['admin'] != 'False'
             or (user_is_group_admin(request, type='python')['admin'] != 'False'
             and request.META['HTTP_REFERER'].split('/')[4] in user_is_group_admin(request, type='python')['admin'])):
-
-        if action == 'add':
-            add_entry_is_admin(user, group)
-            data['action'] = 'added'
-            data['status'] = 'true'
+        if user_is_admin(request, spec='python')['admin'] == 'False'\
+            and user_is_group_admin(request, type='python')['admin'] != 'False'\
+            and request.META['HTTP_REFERER'].split('/')[4] in user_is_group_admin(request, type='python')['admin']\
+            and str(request.user) == str(user):
+            data['status'] = 'itself'
         else:
-            del_entry_is_admin(user, group)
-            data['action'] = 'deleted'
-            data['status'] = 'true'
+            if action == 'add':
+                add_entry_is_admin(user, group)
+                data['action'] = 'added'
+                data['status'] = 'true'
+            else:
+                del_entry_is_admin(user, group)
+                data['action'] = 'deleted'
+                data['status'] = 'true'
 
     return JsonResponse(data)
 
