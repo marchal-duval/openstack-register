@@ -133,8 +133,9 @@ def admin_post_json(request):
     :return:
     """
     data = QueryDict(request.body).dict()
-    group = data['group']
+    group = normalize_string(data['group'])
     desc = data['desc']
+
     ldap = OpenLdap(GLOBAL_CONFIG)
     attrs = {}
 
@@ -143,12 +144,12 @@ def admin_post_json(request):
     if exist != []:
         attrs['status'] = 'already'
     else:
-        try:
-            ldap.addGroup(group, desc, request.user)
-            add_entry_group_info(group)
-            attrs['status'] = 'success'
-        except:
-            attrs['status'] = 'fail'
+    # try:
+        ldap.addGroup(group, desc, request.user)
+        add_entry_group_info(group)
+        attrs['status'] = 'success'
+    # except:
+        attrs['status'] = 'fail'
     return JsonResponse(attrs)
 
 

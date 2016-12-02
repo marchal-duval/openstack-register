@@ -126,6 +126,7 @@ LOGIN_URL = '/login'
 LOGOUT_URL = '/logout:'
 LOGIN_REDIRECT_URL = '/'
 STATIC_URL = '/static/'
+# MEDIA_URL = 'js/'
 GLOBAL_CONFIG = {}
 config = ConfigParser.RawConfigParser()
 config.read('/etc/register.cfg')

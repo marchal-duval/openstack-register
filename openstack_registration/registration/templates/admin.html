@@ -70,7 +70,9 @@ function show_special_theme(status) {
         $('#show_hide_special').attr('style', 'color: #333;');
         $('#addUserButton').text('Add a super admin');
         $('#myModalLabel').text('Add a super admin');
-        $('#alert').html('<h1 style="color: red;"><strong>You can not delete yourself !</strong> *</h1><p style="color: red;">* click anywhere except these lines to hide this message</p>');
+        <!--$('#errorMessage').val("You can not delete yourself !");-->
+
+        $('#alert').html('<div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" style="color: red;">ERROR</h4></div><div class="modal-body"><div style="text-align:center;"><p id="errorMessage" style="color: red;"><strong>You can not delete yourself !</strong></p></div></div></div></div>');
         $('#lateral').attr('src', '/static/fonts/openstack-lal-s-vertical.png');
         $('body').attr('style', 'background-color: #fff;');
         $('#h2special').attr('hidden', '');
@@ -350,7 +352,7 @@ function addGroup() {
                 </div>
                 <div class="modal-body">
                     <div style="text-align:left;">
-                        <p><strong>Type the name of the new group :</strong></p>
+                        <p><strong>Type the name of the new group (letter and digit only, any other character will be removed):</strong></p>
                     </div>
                     <div class="form-group input-group col-sm-12">
                         <label class="control-label col-sm-3" style="line-height: 200%;">Group : </label>
@@ -409,7 +411,22 @@ function addGroup() {
 <div id="alert" class="modal in" tabindex="-1" role="dialog" style="text-align:center;" aria-hidden="true">
     <!--<img align="center" src="/static/fonts/yoda.jpg" style="vertical-align: middle;">-->
     <!--<h1 style="color: #00ff00;"><strong>Delete yourself you must not ! A padawan you are not...</strong></h1>-->
-    <h1 style="color: red;"><strong>You can not delete yourself !</strong> *</h1>
-    <p style="color: red;">* click anywhere except these lines to hide this message</p>
+    <!--<h1 style="color: red;"><strong>You can not delete yourself !</strong> *</h1>-->
+    <!--<p style="color: red;">* click anywhere except these lines to hide this message</p>-->
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" style="color: red;">ERROR</h4>
+            </div>
+            <div class="modal-body">
+                <div style="text-align:center;">
+                    <p id="errorMessage" style="color: red;"><strong>You can not delete yourself !</strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

@@ -134,12 +134,17 @@ class OpenLdap(PrototypeBackend):
         """
         attributes = []
         dn_group = "cn={},ou=groups,o=cloud".format(str(group))
+        print desc
+        print type(desc)
         attrs = {
             'objectClass': ['groupOfUniqueNames', 'top'],
             'cn': "{}".format(str(group)),
             'uniqueMember': "uid={},ou=users,o=cloud".format(str(user)),
-            'description': str(desc)
+            # 'description': str(desc)
         }
+
+        if desc != "":
+           attrs['description'] = str(desc)
 
         for value in attrs:
             entry = (value, attrs[value])

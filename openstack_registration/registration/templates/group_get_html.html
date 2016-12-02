@@ -4,6 +4,7 @@
 {% block title %}OpenStack - Manage Group{% endblock %}
 
 {% block javascript %}
+
 var users = [];
 var users_attributes = [''];
 var admin = [];
@@ -17,6 +18,7 @@ $(document).ready(function() {
     $('#searchInput').keypress( function() {
         document.getElementById('errorAddingUser').innerHTML = '';
     });
+
 });
 
 function sortOnKeys(dict) {
@@ -135,7 +137,8 @@ function removeUserFromGroup(user, action) {
         },
         success: function(json) {
             if (json.status == 'itself') {
-                alert("You can't deleting yourself !")
+                $('#errorMessage').text("You can not delete yourself !");
+                $('#alert').modal('show');
             }
             else {
                 $("#table_id").DataTable().ajax.reload();
@@ -201,7 +204,8 @@ function modifyGroupAdmin(user, group, action) {
         },
         success: function(json) {
             if (json.status == 'itself') {
-                alert("You can't delete yourself !");
+                $('#errorMessage').text("You can not delete yourself !");
+                $('#alert').modal('show');
             }
             else {
                 $("#table_id").DataTable().ajax.reload();
@@ -331,6 +335,23 @@ function getAdminGroup() {
                 </table>
             </div>
 		</div>
+    </div>
+</div>
+<div id="alert" class="modal in" tabindex="-1" role="dialog" style="text-align:center;" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" style="color: red;">ERROR</h4>
+            </div>
+            <div class="modal-body">
+                <div style="text-align:center;">
+                    <p id="errorMessage" style="color: red;"><strong></strong></p>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
