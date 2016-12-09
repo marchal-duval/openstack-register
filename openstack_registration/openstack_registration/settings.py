@@ -1,3 +1,5 @@
+#!/usr/local/bin/python2.7
+# -*- coding: utf-8 -*-
 """
 Django settings for openstack_registration project.
 
@@ -12,10 +14,14 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 
 import os
 import ldap
-from django_auth_ldap.config import LDAPSearch
+from utils import create_logger
+import logging
 import ConfigParser
+from django_auth_ldap.config import LDAPSearch
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -44,14 +50,15 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE_CLASSES = [
-    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
 ]
 
 ROOT_URLCONF = 'openstack_registration.urls'
@@ -128,6 +135,11 @@ LOGIN_REDIRECT_URL = '/'
 STATIC_URL = '/static/'
 # MEDIA_URL = 'js/'
 GLOBAL_CONFIG = {}
+logging_mode = 'both'
+logger = create_logger(logging_mode, stream_level=logging.DEBUG)
+
+# GLOBAL_CONFIG['LOGGER'] = logger
+
 config = ConfigParser.RawConfigParser()
 config.read('/etc/register.cfg')
 
@@ -137,6 +149,7 @@ GLOBAL_CONFIG['LDAP_PASSWORD'] = config.get('LDAP', 'password')
 GLOBAL_CONFIG['LDAP_BASE_OU'] = config.get('LDAP', 'user_search')
 GLOBAL_CONFIG['project'] = ''
 GLOBAL_CONFIG['admin'] = config.get('MAILING', 'admin')
+GLOBAL_CONFIG['DEBUG_LVL'] = config.get('MAIN', 'debug_lvl')
 
 
 AUTH_LDAP_SERVER_URI = config.get('AUTH', 'server')

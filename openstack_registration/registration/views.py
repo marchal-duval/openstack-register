@@ -8,8 +8,10 @@ from django.contrib import auth
 from openstack_registration.settings import GLOBAL_CONFIG
 from Backend import OpenLdap
 from registration.exceptions import InvalidX500DN
-from registration.models import *
-from utils import *
+from registration.utils import *
+
+
+LOGGER = logging.getLogger("registration")
 
 
 def user_is_authenticate(request):
@@ -77,6 +79,59 @@ def user_is_admin(request,
         return data
     else:
         return JsonResponse(data)
+
+
+@login_required()
+def logs_dispatcher(request):
+    if user_is_admin(request, spec='python')['admin'] != 'False':
+        if request.method == 'GET'\
+                and 'version' in request.GET:
+             return logs_get_json(request)
+        else:
+            return logs_get_html(request)
+    else:
+        return redirect('/')
+
+
+@login_required()
+def logs_get_json(request):
+    # pass
+    data = {}
+    log_file = open("/var/log/registration/registration.log", "r")
+    lines = log_file.readlines()
+    log_file.close()
+    version = request.GET['version']
+    filtered = ''
+
+    if 'filter' in request.GET and request.GET['filter'] != '':
+        search = str(request.GET['filter'].lower().encode('utf-8'))
+        if version == 'actions':
+            for line in lines:
+                if line.lower().__contains__(search)\
+                        and line.__contains__("CREATE")\
+                        or line.lower().__contains__(search)\
+                        and line.__contains__("MODIFIED"):
+                    filtered = line + filtered
+        elif version == 'full':
+            for line in lines:
+                if line.lower().__contains__(search):
+                    filtered = line + filtered
+    else:
+        if version == 'actions':
+            for each in lines:
+                if each.__contains__("CREATE") or each.__contains__("MODIFIED"):
+                    filtered = each + filtered
+        elif version == 'full':
+            for each in lines:
+                filtered = each + filtered
+
+    data['logs'] = filtered
+    return JsonResponse(data)
+
+
+@login_required()
+def logs_get_html(request):
+    return render(request, 'logs_get_html.html')
 
 
 @login_required()
@@ -291,6 +346,7 @@ def login(request):
 
     if request.user.is_authenticated():
         redirect_page = "/users/{}".format(request.user)
+        # LOGGER.info("User %s is connected from %s", request.user, request.META.get('REMOTE_ADDR'))
         return redirect(redirect_page)
     else:
         if request.method == "POST":
@@ -299,6 +355,7 @@ def login(request):
             if user is not None:
                 redirect_page = "/users/{}".format(request.POST['username'].lower())
                 auth.login(request, user)
+                LOGGER.info("User %s is connected from %s", request.user, request.META.get('REMOTE_ADDR'))
                 return HttpResponseRedirect(redirect_page)
             else:
                 info['info'] = 'Your login/password are wrong'
