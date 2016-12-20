@@ -12,6 +12,7 @@ from registration.utils import *
 
 
 LOGGER = logging.getLogger("registration")
+LOGGER_ERROR = logging.getLogger("registration_error")
 
 
 def user_is_authenticate(request):
@@ -39,7 +40,6 @@ def user_is_admin(request,
     data = {}
     data['admin'] = 'False'
     user = UserInfo.objects.filter(username=request.user)
-
 
     if spec == 'dataTable':
         data['list'] = {}
@@ -104,22 +104,31 @@ def logs_get_json(request):
     filtered = ''
 
     if 'filter' in request.GET and request.GET['filter'] != '':
-        search = str(request.GET['filter'].lower().encode('utf-8'))
+        # search = str(request.GET['filter'].lower().encode('utf-8'))
+        search = str(request.GET['filter'].encode('utf-8'))
         if version == 'actions':
             for line in lines:
-                if line.lower().__contains__(search)\
-                        and line.__contains__("CREATE")\
-                        or line.lower().__contains__(search)\
-                        and line.__contains__("MODIFIED"):
+                # if line.lower().__contains__(search)\
+                #         and line.__contains__("CREATED")\
+                #         or line.lower().__contains__(search)\
+                #         and line.__contains__("MODIFIED")\
+                #         or line.lower().__contains__(search)\
+                #         and line.__contains__("CONNECTED"):
+                if line.__contains__(search)\
+                        and (line.__contains__("CREATED")
+                        or line.__contains__("MODIFIED")
+                        or line.__contains__("LOGOUT")
+                        or line.__contains__("CONNECTED")):
                     filtered = line + filtered
         elif version == 'full':
             for line in lines:
-                if line.lower().__contains__(search):
+                # if line.lower().__contains__(search):
+                if line.__contains__(search):
                     filtered = line + filtered
     else:
         if version == 'actions':
             for each in lines:
-                if each.__contains__("CREATE") or each.__contains__("MODIFIED"):
+                if each.__contains__("CREATE") or each.__contains__("MODIFIED") or each.__contains__("CONNECTED") or each.__contains__("LOGOUT"):
                     filtered = each + filtered
         elif version == 'full':
             for each in lines:
@@ -199,12 +208,13 @@ def admin_post_json(request):
     if exist != []:
         attrs['status'] = 'already'
     else:
-    # try:
-        ldap.addGroup(group, desc, request.user)
-        add_entry_group_info(group)
-        attrs['status'] = 'success'
-    # except:
-        attrs['status'] = 'fail'
+        try:
+            ldap.addGroup(group, desc, request.user)
+            add_entry_group_info(group)
+            LOGGER.info("GROUP CREATED  :: Operator : %s  :: Attributes : name=%s, desc=%s ", request.user, group, desc)
+            attrs['status'] = 'success'
+        except:
+            attrs['status'] = 'fail'
     return JsonResponse(attrs)
 
 
@@ -240,12 +250,15 @@ def admin_put_json(request):
                 value = True
                 update_count_force(request.user, 'add')
             else:
-                value = False
-                update_count_force(request.user, 'remove')
-
                 if str(request.user) == str(user):
                     data['status'] = "itself"
                     return JsonResponse(data)
+                value = False
+                update_count_force(request.user, 'remove')
+            if value:
+                LOGGER.info("ADMIN MODIFIED :: Operator : %s  :: Attributes : user=%s, action=admin added ", request.user, user)
+            else:
+                LOGGER.info("ADMIN MODIFIED :: Operator : %s  :: Attributes : user=%s, action=admin deleted ", request.user, user)
             result = update_entry_user_info(user, value)
             return JsonResponse(result)
 
@@ -332,7 +345,7 @@ def modify_group_admin(request,
                 del_entry_is_admin(user, group)
                 data['action'] = 'deleted'
                 data['status'] = 'true'
-
+    LOGGER.info("GROUP MODIFIED :: Operator : %s  :: Attributes : group=%s, user=%s, action=%s group admin ", request.user, group, user, data['action'])
     return JsonResponse(data)
 
 
@@ -346,7 +359,6 @@ def login(request):
 
     if request.user.is_authenticated():
         redirect_page = "/users/{}".format(request.user)
-        # LOGGER.info("User %s is connected from %s", request.user, request.META.get('REMOTE_ADDR'))
         return redirect(redirect_page)
     else:
         if request.method == "POST":
@@ -355,7 +367,7 @@ def login(request):
             if user is not None:
                 redirect_page = "/users/{}".format(request.POST['username'].lower())
                 auth.login(request, user)
-                LOGGER.info("User %s is connected from %s", request.user, request.META.get('REMOTE_ADDR'))
+                LOGGER.info("USER CONNECTED :: User %s is connected from %s", request.user, request.META.get('REMOTE_ADDR'))
                 return HttpResponseRedirect(redirect_page)
             else:
                 info['info'] = 'Your login/password are wrong'
@@ -372,6 +384,7 @@ def logout(request):
     :param request: HTTP request
     :return: HTTP
     """
+    LOGGER.info("USER LOGOUT    :: User %s is disconnected from %s ", request.user, request.META.get('REMOTE_ADDR'))
     auth.logout(request)
     return redirect('/')
 
@@ -515,6 +528,7 @@ def group_put_json(request):
                 update_count_force(request.user, 'add')
             else:
                 status = "False"
+            LOGGER.info("GROUP MODIFIED :: Operator : %s  :: Attributes : group=%s, user=%s, action=member added", request.user, group, user)
         else:
             status = "already"
     except:
@@ -548,6 +562,7 @@ def group_del_json(request):
             status = "True"
             if user_is_admin(request, spec='python')['admin'] != 'False':
                 update_count_force(request.user, 'remove')
+            LOGGER.info("GROUP MODIFIED :: Operator : %s  :: Attributes : group=%s, user=%s, action=member deleted", request.user, group, user)
         else:
             status = "False"
         data['status'] = status
@@ -764,6 +779,7 @@ def attributes_dispatcher(request):
                                    .encode(encoding='utf-8'))
         try:
             attrs = ldap.change_user_password(uid, password)
+            LOGGER.info("USER MODIFIED  :: username=%s, action=password changed", request.user)
             return JsonResponse(attrs)
         except:
             info['info'] = 'Fail to change your password.'
@@ -827,6 +843,7 @@ def add_user(request,
 
     try:
         ldap.add_user(username, email, firstname, lastname, x500dn, password)
+        LOGGER.info("USER CREATED   :: Operator : %s  :: Attributes : username=%s, firstname=%s, lastname=%s, email=%s ", request.user, username, firstname, lastname, email)
     except InvalidX500DN:
         exit(1)
     send_mail(username, firstname, lastname, email, '', '', 'add')
@@ -844,6 +861,7 @@ def activate_user(request):
                   attrs['mail'], GLOBAL_CONFIG['project'],
                   'marchal@lal.in2p3.fr', 'enable')
                   # GLOBAL_CONFIG['admin'], 'enable')
+        LOGGER.info("USER MODIFIED  :: user=%s, action=activated", attrs['username'])
     except:
         info['info'] = 'Your account is already enable or the url is not ' \
                           'valid, please check your mailbox.'

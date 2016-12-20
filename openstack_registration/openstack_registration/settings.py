@@ -14,7 +14,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 
 import os
 import ldap
-from utils import create_logger
+from utils import create_logger, create_logger_error
 import logging
 import ConfigParser
 from django_auth_ldap.config import LDAPSearch
@@ -137,6 +137,7 @@ STATIC_URL = '/static/'
 GLOBAL_CONFIG = {}
 logging_mode = 'both'
 logger = create_logger(logging_mode, stream_level=logging.DEBUG)
+logger_error = create_logger_error(logging_mode, stream_level=logging.DEBUG)
 
 # GLOBAL_CONFIG['LOGGER'] = logger
 
