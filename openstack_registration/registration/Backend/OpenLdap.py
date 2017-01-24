@@ -134,8 +134,8 @@ class OpenLdap(PrototypeBackend):
         """
         attributes = []
         dn_group = "cn={},ou=groups,o=cloud".format(str(group))
-        print desc
-        print type(desc)
+        # print desc
+        # print type(desc)
         attrs = {
             'objectClass': ['groupOfUniqueNames', 'top'],
             'cn': "{}".format(str(group)),

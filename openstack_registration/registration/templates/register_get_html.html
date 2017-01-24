@@ -34,12 +34,17 @@ $(function() {
 
 function get_certificate_dn() {
     $('#xDNInput').val('');
+    $.ajaxSetup({
+        beforeSend : function(xhr) {
+            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}" );
+        }
+    });
     $.ajax({
         type: 'GET',
-        url: '/register',
-        success: function(data, textStatus, jqXHR){
-            if (jqXHR.getResponseHeader('SSL_CLIENT_S_DN') != '(null)') {
-               $('#xDNInput').val(jqXHR.getResponseHeader('SSL_CLIENT_S_DN'));
+        url: '/register?format=json&cert',
+        success: function(json){
+            if (json.DN != '') {
+               $('#xDNInput').val(json.DN);
             }
         }
     });

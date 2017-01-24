@@ -9,6 +9,7 @@ from openstack_registration.settings import GLOBAL_CONFIG
 from Backend import OpenLdap
 from registration.exceptions import InvalidX500DN
 from registration.utils import *
+import urllib2
 
 
 LOGGER = logging.getLogger("registration")
@@ -256,9 +257,9 @@ def admin_put_json(request):
                 value = False
                 update_count_force(request.user, 'remove')
             if value:
-                LOGGER.info("ADMIN MODIFIED :: Operator : %s  :: Attributes : user=%s, action=admin added ", request.user, user)
+                LOGGER.info("ADMIN MODIFIED :: Operator : %s  :: Attributes : user=%s, action=promote super admin ", request.user, user)
             else:
-                LOGGER.info("ADMIN MODIFIED :: Operator : %s  :: Attributes : user=%s, action=admin deleted ", request.user, user)
+                LOGGER.info("ADMIN MODIFIED :: Operator : %s  :: Attributes : user=%s, action=dismiss super admin ", request.user, user)
             result = update_entry_user_info(user, value)
             return JsonResponse(result)
 
@@ -345,7 +346,11 @@ def modify_group_admin(request,
                 del_entry_is_admin(user, group)
                 data['action'] = 'deleted'
                 data['status'] = 'true'
-    LOGGER.info("GROUP MODIFIED :: Operator : %s  :: Attributes : group=%s, user=%s, action=%s group admin ", request.user, group, user, data['action'])
+    if 'action' in data:
+        if data['action'] == 'added':
+            LOGGER.info("GROUP MODIFIED :: Operator : %s  :: Attributes : group=%s, user=%s, action=promote group admin ", request.user, group, user)
+        elif data['action'] == 'deleted':
+            LOGGER.info("GROUP MODIFIED :: Operator : %s  :: Attributes : group=%s, user=%s, action=dismiss group admin ", request.user, group, user)
     return JsonResponse(data)
 
 
@@ -361,6 +366,11 @@ def login(request):
         redirect_page = "/users/{}".format(request.user)
         return redirect(redirect_page)
     else:
+        # response = urllib2.urlopen(request)
+        # print response
+        # print response.info()
+        # print request.response.get()
+
         if request.method == "POST":
             user = auth.authenticate(username=request.POST['username'].lower(),
                                      password=request.POST['password'])
@@ -562,6 +572,10 @@ def group_del_json(request):
             status = "True"
             if user_is_admin(request, spec='python')['admin'] != 'False':
                 update_count_force(request.user, 'remove')
+            try:
+                del_entry_is_admin(user, group)
+            except:
+                pass
             LOGGER.info("GROUP MODIFIED :: Operator : %s  :: Attributes : group=%s, user=%s, action=member deleted", request.user, group, user)
         else:
             status = "False"
@@ -739,10 +753,15 @@ def policies_get_html(request):
 
 
 def register_dispatcher(request):
+    attributes = {}
     if 'format' in request.GET:
         if 'adduser' in request.GET:
             attributes = QueryDict(request.body).dict()
             add_user(request, attributes)
+            return JsonResponse(attributes)
+        elif 'cert' in request.GET:
+            if 'SSL_CLIENT_S_DN' in request.META:
+                attributes['DN'] = request.META['SSL_CLIENT_S_DN']
             return JsonResponse(attributes)
     else:
         return render(request, 'register_get_html.html')
