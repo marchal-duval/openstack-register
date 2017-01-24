@@ -2,6 +2,21 @@
 {% load i18n %}
 {% block title %}OpenStack - Register{% endblock %}
 
+{% block css %}
+
+<style>
+    .input-group-addon.input-group-addon-spec {
+        padding: 0px 0px;
+        border: 0px solid #ccc;
+    }
+
+    .popover{
+        width: 150%;
+    }
+
+</style>
+{% endblock %}
+
 {% block javascript %}
 
 $(document).ready(function() {
@@ -13,6 +28,7 @@ $(document).on("keyup click ready", function() {
 });
 
 $(function() {
+    $('[data-toggle="popover"]').popover()
     get_certificate_dn();
     hide_see_password();
     hide_send_button_on_diff();
@@ -130,6 +146,7 @@ function check_form() {
     else {
         document.getElementById("errorText").innerHTML = '';
     }
+    normalize_project();
 }
 
 function isUsernameExist() {
@@ -148,6 +165,16 @@ function isUsernameExist() {
             }
         }
     );
+}
+
+function normalize_project() {
+    if ( $("#projectInput").val() != '') {
+        $.getJSON( "/attributes/?format=json", { project: $("#projectInput").val() }).done(
+            function (json) {
+                $("#projectInput").val(json.project);
+            }
+        );
+    }
 }
 
 function check_characters_name() {
@@ -363,7 +390,10 @@ function isValidEmailAddress(emailAddress) {
         <div class="form-group col-sm-10">
             <label id="xDNLabel" class="control-label col-sm-2">X500 DN: </label>
             <div id="xDN" class="col-sm-3">
-                <input id="xDNInput" type="text" value="" class="form-control" placeholder="X500 DN" aria-describedby="basic-addon1">
+                <div class="input-group">
+                    <input id="xDNInput" type="text" value="" class="form-control" placeholder="X500 DN" aria-describedby="basic-addon1">
+                    <span class="input-group-addon input-group-addon-spec"><button type="button" id="dnIcon" title="Cert field info" data-toggle="popover" data-trigger="focus" data-placement="right" data-content="Your X500 DN Certificate have to be exact. You can add your certificate on your browser and this page will detect it automatically (if not look at your settings)." class="btn glyphicon glyphicon-info-sign"></button></span>
+                </div>
             </div>
             <div class="col-sm-5">
                 <p id="errorXDN" style="color:red"></p>
@@ -372,7 +402,10 @@ function isValidEmailAddress(emailAddress) {
         <div class="form-group col-sm-10">
             <label id="projectLabel" class="control-label col-sm-2">Project: </label>
             <div id="project" class="col-sm-3">
-                <input id="projectInput" type="text" value="" class="form-control" placeholder="Project wished" aria-describedby="basic-addon1">
+                <div class="input-group">
+                    <input id="projectInput" type="text" value="" class="form-control" placeholder="Project wished" aria-describedby="basic-addon1">
+                    <span class="input-group-addon input-group-addon-spec"><button type="button" id="projectIcon" title="Project field info" data-toggle="popover" data-trigger="focus" data-placement="right" data-content="You can put a name of a project if you know it (must be a name with letter and digit only; no accent no special character...)" class="btn glyphicon glyphicon-info-sign"></button></span>
+                </div>
             </div>
             <div class="col-sm-5">
                 <p id="errorProject" style="color:red"></p>

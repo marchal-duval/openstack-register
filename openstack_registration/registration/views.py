@@ -847,6 +847,11 @@ def attributes_dispatcher(request):
             attributes['status'] = 'success'
         return JsonResponse(attributes)
 
+    elif 'project' in request.GET:
+        project = normalize_string(request.GET['project'])
+        attributes['project'] = project
+        return JsonResponse(attributes)
+
 
 def add_user(request,
              attributes):
@@ -878,8 +883,8 @@ def activate_user(request):
         attrs = ldap.enable_user(uuid)
         send_mail(attrs['username'], attrs['firstname'], attrs['lastname'],
                   attrs['mail'], GLOBAL_CONFIG['project'],
-                  'marchal@lal.in2p3.fr', 'enable')
-                  # GLOBAL_CONFIG['admin'], 'enable')
+                  # 'marchal@lal.in2p3.fr', 'enable')
+                  GLOBAL_CONFIG['admin'], 'enable')
         LOGGER.info("USER MODIFIED  :: user=%s, action=activated", attrs['username'])
     except:
         info['info'] = 'Your account is already enable or the url is not ' \
