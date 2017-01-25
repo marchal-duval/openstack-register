@@ -197,25 +197,30 @@ def admin_post_json(request):
     :param request:
     :return:
     """
+    attrs = {}
     data = QueryDict(request.body).dict()
     group = normalize_string(data['group'])
-    desc = data['desc']
+    desc = normalize_string(data['desc'], option='name')
 
-    ldap = OpenLdap(GLOBAL_CONFIG)
-    attrs = {}
-
-    exist = ldap.search_group(uid=group)
-
-    if exist != []:
-        attrs['status'] = 'already'
+    if group != unicode(data['group']).encode(encoding='utf-8') or desc != unicode(data['desc']).encode(encoding='utf-8'):
+    # if str(group) != str(data['group']) or str(desc) != str(data['desc']):
+        attrs['group'] = group
+        attrs['desc'] = desc
+        attrs['status'] = 'change'
     else:
-        try:
-            ldap.addGroup(group, desc, request.user)
-            add_entry_group_info(group)
-            LOGGER.info("GROUP CREATED  :: Operator : %s  :: Attributes : name=%s, desc=%s ", request.user, group, desc)
-            attrs['status'] = 'success'
-        except:
-            attrs['status'] = 'fail'
+        ldap = OpenLdap(GLOBAL_CONFIG)
+        exist = ldap.search_group(uid=group)
+
+        if exist != []:
+            attrs['status'] = 'already'
+        else:
+            try:
+                ldap.addGroup(group, desc, request.user)
+                add_entry_group_info(group)
+                LOGGER.info("GROUP CREATED  :: Operator : %s  :: Attributes : name=%s, desc=%s ", request.user, group, desc)
+                attrs['status'] = 'success'
+            except:
+                attrs['status'] = 'fail'
     return JsonResponse(attrs)
 
 

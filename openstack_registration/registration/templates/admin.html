@@ -11,12 +11,25 @@ $(document).ready(function() {
     get_admin();
     get_counter();
 
+    $('#addUserButton').click( function() {
+        document.getElementById('errorAddingSuperAdmin').innerHTML = "";
+        $('#searchInput').val('');
+    });
+
+    $('#addGroupButton').click( function() {
+        document.getElementById('errorAddingGroup').innerHTML = "";
+        $('#groupInput').val('');
+        $('#descInput').val('');
+    });
+
     $('#addingButton').click(function() {
         addSuperAdmin( $('#searchInput').val(), 'add');
     });
 
     $('#addingGroupButton').click(function() {
-        addGroup();
+        if ( $('#groupInput').val() != '' ) {
+            addGroup();
+        }
     });
 
     $('#searchInput, #groupInput').keypress( function() {
@@ -215,6 +228,8 @@ function addSuperAdmin(user, action) {
         },
         success: function(json) {
             if (json.status == 'True') {
+                document.getElementById('errorAddingSuperAdmin').innerHTML = "User '" + user + "' has been added to the Super Admin !";
+                $('#searchInput').val('');
                 $("#table_id").DataTable().ajax.reload();
             }
             else if (json.status == 'already') {
@@ -267,9 +282,18 @@ function addGroup() {
             if (json.status == 'already') {
                 document.getElementById('errorAddingGroup').innerHTML = "This group already exist !";
             }
+            else if (json.status == 'change') {
+                $('#groupInput').val(json.group);
+                $('#descInput').val(json.desc);
+                document.getElementById('errorAddingGroup').innerHTML = "Group name and/or description have change; check the new one and click on add if it's convenient.";
+            }
+            else {
+                document.getElementById('errorAddingGroup').innerHTML = "Group '" + $('#groupInput').val() + "' has been created !";
+                $('#groupInput').val('');
+                $('#descInput').val('');
+            }
         }
     });
-
 }
 
 {% endblock %}
