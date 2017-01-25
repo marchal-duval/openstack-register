@@ -108,6 +108,7 @@ function add_user() {
         },
         success: function() {
             clear_form();
+            document.getElementById("errorCreation").innerHTML = "ACCOUNT CREATED";
         },
         error: function() {
             document.getElementById("errorCreation").innerHTML = "ACCOUNT NOT CREATED";
