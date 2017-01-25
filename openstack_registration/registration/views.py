@@ -119,7 +119,7 @@ def logs_get_json(request):
                         and (line.__contains__("CREATED")
                         or line.__contains__("MODIFIED")
                         or line.__contains__("LOGOUT")
-                        or line.__contains__("CONNECTED")):
+                        or line.__contains__("LOGIN")):
                     filtered = line + filtered
         elif version == 'full':
             for line in lines:
@@ -129,7 +129,7 @@ def logs_get_json(request):
     else:
         if version == 'actions':
             for each in lines:
-                if each.__contains__("CREATE") or each.__contains__("MODIFIED") or each.__contains__("CONNECTED") or each.__contains__("LOGOUT"):
+                if each.__contains__("CREATE") or each.__contains__("MODIFIED") or each.__contains__("LOGIN") or each.__contains__("LOGOUT"):
                     filtered = each + filtered
         elif version == 'full':
             for each in lines:
@@ -377,7 +377,7 @@ def login(request):
             if user is not None:
                 redirect_page = "/users/{}".format(request.POST['username'].lower())
                 auth.login(request, user)
-                LOGGER.info("USER CONNECTED :: User %s is connected from %s", request.user, request.META.get('REMOTE_ADDR'))
+                LOGGER.info("USER LOGIN     :: User %s is connected from %s", request.user, request.META.get('REMOTE_ADDR'))
                 return HttpResponseRedirect(redirect_page)
             else:
                 info['info'] = 'Your login/password are wrong'

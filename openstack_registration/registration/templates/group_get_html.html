@@ -18,6 +18,10 @@ $(document).ready(function() {
     $('#searchInput').keypress( function() {
         document.getElementById('errorAddingUser').innerHTML = '';
     });
+    $('#addUserButton').click(function() {
+        $('#searchInput').val('');
+        document.getElementById('errorAddingUser').innerHTML = "";
+    });
 
 });
 
@@ -166,6 +170,10 @@ function addUserFromGroup(user, action) {
             }
             else if (json.status == "already") {
                 document.getElementById('errorAddingUser').innerHTML = "This user is already member of this group !";
+            }
+            else {
+                document.getElementById('errorAddingUser').innerHTML = "User '" + user + "' has been added to the group !";
+                $('#searchInput').val('');
             }
             $("#table_id").DataTable().ajax.reload();
         }
