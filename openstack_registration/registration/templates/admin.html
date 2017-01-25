@@ -285,7 +285,7 @@ function addGroup() {
             else if (json.status == 'change') {
                 $('#groupInput').val(json.group);
                 $('#descInput').val(json.desc);
-                document.getElementById('errorAddingGroup').innerHTML = "Group name and/or description have change; check the new one and click on add if it's convenient.";
+                document.getElementById('errorAddingGroup').innerHTML = "Group name and/or description have changed; check the new one and click on add if it's convenient.";
             }
             else {
                 document.getElementById('errorAddingGroup').innerHTML = "Group '" + $('#groupInput').val() + "' has been created !";
