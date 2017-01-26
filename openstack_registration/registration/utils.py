@@ -5,14 +5,58 @@ import os
 import hashlib
 import unicodedata
 import re
+import logging
+from logging.handlers import RotatingFileHandler
 # from base64 import urlsafe_b64encode as encode
 # from base64 import urlsafe_b64decode as decode
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import uuid
-from models import UserActivation
+from models import UserActivation, UserInfo, GroupInfo, IsAdmin
+from datetime import datetime
 
+LOGGER = logging.getLogger("registration")
+
+# def create_logger(mode,
+#                   stream_level=logging.INFO,
+#                   file_level=logging.DEBUG):
+#     """
+#     Create a logger according to the given level
+#     :param mode:
+#     :param stream_level:
+#     :param file_level:
+#     :return:
+#     """
+#     logger = logging.getLogger("registration")
+#     logger.setLevel(logging.DEBUG)
+#
+#     # Use rsyslog to send logs to others
+#     # handler = logging.handlers.SysLogHandler(address="/dev/log")
+#     formatter = logging.Formatter(
+#         '%(asctime)s :: %(levelname)s :: %(message)s'
+#     )
+#
+#     if mode == 'both':
+#         # Fichier en mode 'append', avec 1 backup et une taille max de 1Mo
+#         file_handler = RotatingFileHandler('/var/log/registration/registration.log',
+#                                            'a',
+#                                            1000000,
+#                                            1)
+#
+#         file_handler.setLevel(file_level)
+#         file_handler.setFormatter(formatter)
+#         logger.addHandler(file_handler)
+#
+#     # rsyslog
+#     # handler.formatter = formatter
+#     # logger.addHandler(handler)
+#     #
+#     # stream_handler = logging.StreamHandler()
+#     # stream_handler.setLevel(stream_level)
+#     # logger.addHandler(stream_handler)
+#
+#     return logger
 
 # def encode_password(password):
 #     salt = os.urandom(4)
@@ -146,6 +190,7 @@ def send_mail(username,
               firstname,
               lastname,
               user_email,
+              project,
               admin_mail,
               action):
     """
@@ -159,28 +204,31 @@ def send_mail(username,
     :return:
     """
     message = ''
+    all_rcpt = ''
     header = MIMEMultipart()
-    header['From'] = 'no-reply@openstack.lal.in2p3.fr'
+    header['From'] = 'no-reply@lal.in2p3.fr'
     header['To'] = user_email
     header['Subject'] = 'OpenStack Registration Message'
 
     if action == 'add':
+        all_rcpt = user_email
         random_string = uuid.uuid4()
         link = "http://134.158.76.228:8000/action/{}".format(random_string)
-
         message = "Dear {} {}, \n\nYou just created an account on OpenStack@lal.\n" \
                   "Please follow the link to activate your account: \n{}\n\n" \
                   "You can have access to your profile on the registration " \
                   "website but YOU ARE NOT ABLE TO AUTHENTICATE ON THE CLOUD " \
                   "UNTIL ENABLED." \
                   "\n\nDon't reply at this email.\n" \
-                  "Support : https://glpi-openstack.lal.in2p3.fr/"\
+                  "Support : https://cloud-support.lal.in2p3.fr/"\
                   .format(firstname,
                           lastname,
                           link)
-        add_entry_database(random_string, username)
+        add_entry_user_activation(random_string, username)
 
     elif action == 'enable':
+        all_rcpt = str(admin_mail).split(',') + [user_email]
+        header['Bcc'] = str(admin_mail)
         message = "Dear {} {}, \n\nYour account have been successfully " \
                   "activated.\n" \
                   "You still must belong to a project to use the platform.\n" \
@@ -188,21 +236,83 @@ def send_mail(username,
                   "to connect to https://keystone.lal.in2p3.fr. \n\n" \
                   "Your domain is 'stratuslab'.\n" \
                   "Your Username is '{}'.\n" \
+                  "Project you want to be added : {}\n" \
                   "\n\nDon't reply at this email.\n" \
                   "Support : https://cloud-support.lal.in2p3.fr/"\
                   .format(firstname,
                           lastname,
-                          username)
+                          username,
+                          project)
+        add_entry_user_info(username, datetime.now())
 
     header.attach(MIMEText(message))
     mail_server = smtplib.SMTP('smtp.lal.in2p3.fr', 25)
-    mail_server.sendmail('root', user_email,
+    # replace marchal@ by all_rcpt
+    # mail_server.sendmail('no-reply@lal.in2p3.fr', 'marchal@lal.in2p3.fr',
+    mail_server.sendmail('no-reply@lal.in2p3.fr', all_rcpt,
                          header.as_string())
-    # replace marchal@.. by user_email
+
     mail_server.quit()
 
 
-def add_entry_database(random_string,
-                       user):
+def add_entry_user_activation(random_string,
+                              user):
+
     new_user = UserActivation(link=random_string, username=user)
     new_user.save()
+
+
+def add_entry_user_info(user,
+                        date):
+    new_user = UserInfo(username=user, last_agreement=date, enabled=True)
+    new_user.save()
+
+
+def add_entry_group_info(group):
+    new_group = GroupInfo(group_name=group)
+    new_group.save()
+
+
+def add_entry_is_admin(user,
+                      group):
+    user_id = UserInfo.objects.filter(username=user)[0].id
+    exist_user = UserInfo.objects.get(id=user_id)
+    group_id = GroupInfo.objects.filter(group_name=group)[0].id
+    exist_group = GroupInfo.objects.get(id=group_id)
+    new_admin = IsAdmin(administrators=exist_user, group=exist_group)
+    new_admin.save()
+
+
+def del_entry_is_admin(user,
+                       group):
+    user_id = UserInfo.objects.filter(username=user)[0].id
+    exist_user = UserInfo.objects.get(id=user_id)
+    group_id = GroupInfo.objects.filter(group_name=group)[0].id
+    exist_group = GroupInfo.objects.get(id=group_id)
+    admin = IsAdmin.objects.filter(administrators=exist_user, group=exist_group)
+    admin.delete()
+
+
+def update_entry_user_info(user,
+                           value):
+    data = {}
+    try:
+        existing_user = UserInfo.objects.filter(username=user)
+        # existing_user[0].admin = value
+        existing_user.update(admin=value)
+        data['status'] = 'True'
+    except:
+        data['status'] = 'False'
+    return data
+
+def update_count_force(user,
+                       action):
+    try:
+        existing_user = UserInfo.objects.filter(username=user)
+        if action == 'add':
+            value = existing_user[0].countForce + 1
+        else:
+            value = existing_user[0].countForce - 1
+        existing_user.update(countForce=value)
+    except:
+        pass

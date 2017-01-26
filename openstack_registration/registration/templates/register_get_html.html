@@ -2,6 +2,21 @@
 {% load i18n %}
 {% block title %}OpenStack - Register{% endblock %}
 
+{% block css %}
+
+<style>
+    .input-group-addon.input-group-addon-spec {
+        padding: 0px 0px;
+        border: 0px solid #ccc;
+    }
+
+    .popover{
+        width: 150%;
+    }
+
+</style>
+{% endblock %}
+
 {% block javascript %}
 
 $(document).ready(function() {
@@ -13,8 +28,36 @@ $(document).on("keyup click ready", function() {
 });
 
 $(function() {
+    $('[data-toggle="popover"]').popover()
+    get_certificate_dn();
     hide_see_password();
-    hide_send_button_on_diff();
+
+    $.ajax({
+        url: hide_send_button_on_diff(),
+        success: function (json) {
+            check_send_button();
+        }
+    });
+
+
+    <!--hide_send_button_on_diff();-->
+    <!--$('#checkButton').click( function() {-->
+        <!--$.ajax({-->
+            <!--url: check_form(),-->
+            <!--statusCode: {-->
+                <!--200: function() {-->
+                    <!--hide_send_button();-->
+                <!--}-->
+            <!--}-->
+        <!--});-->
+    <!--});-->
+
+    $('#sendButton').click( function() {
+        add_user();
+    });
+});
+
+function check_send_button() {
     $('#checkButton').click( function() {
         $.ajax({
             url: check_form(),
@@ -25,11 +68,25 @@ $(function() {
             }
         });
     });
+}
 
-    $('#sendButton').click( function() {
-        add_user();
+function get_certificate_dn() {
+    $('#xDNInput').val('');
+    $.ajaxSetup({
+        beforeSend : function(xhr) {
+            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}" );
+        }
     });
-});
+    $.ajax({
+        type: 'GET',
+        url: '/register?format=json&cert',
+        success: function(json){
+            if (json.DN != '') {
+               $('#xDNInput').val(json.DN);
+            }
+        }
+    });
+}
 
 function add_user() {
     $.ajaxSetup({
@@ -45,12 +102,16 @@ function add_user() {
                 'email': $('#emailInput').val(),
                 'firstname': $('#firstnameInput').val(),
                 'lastname': $('#lastnameInput').val(),
-                'password': $('#passwordInput').val()
+                'password': $('#passwordInput').val(),
+                'project': $('#projectInput').val(),
+                'x500dn': $('#xDNInput').val()
         },
         success: function() {
             clear_form();
+            document.getElementById("errorCreation").innerHTML = "ACCOUNT CREATED";
         },
         error: function() {
+            document.getElementById("errorCreation").innerHTML = "ACCOUNT NOT CREATED";
         }
     });
 }
@@ -60,6 +121,8 @@ function clear_form() {
     $("#firstnameInput").val('');
     $("#lastnameInput").val('');
     $("#emailInput").val('');
+    $("#xDNInput").val('');
+    $("#projectInput").val('');
     $("#passwordInput").val('');
     $("#checkPasswordInput").val('');
     checkBoxInput.checked = '';
@@ -73,6 +136,7 @@ function hide_send_button_on_diff() {
 }
 
 function check_form() {
+    document.getElementById("errorCreation").innerHTML = '';
     if (( $("#usernameInput").val().length < 3 ) || ( $("#usernameInput").val().length > 20 )) {
         document.getElementById("errorUsername").innerHTML = "Username have to contains 3 to 20 characters !";
     }
@@ -105,11 +169,23 @@ function check_form() {
     else {
         document.getElementById("errorText").innerHTML = '';
     }
+    if ( $("#projectInput").val() != '' ) {
+        normalize_project();
+    }
 }
 
 function isUsernameExist() {
-    $.getJSON( "/attributes/?format=json", { uid: $('#usernameInput').val() }).done(
-        function (json) {
+    $.ajaxSetup({
+        beforeSend : function(xhr) {
+            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}" );
+        }
+    });
+    $.ajax({
+        type: 'GET',
+        url: '/attributes/?format=json',
+        data: { 'uid': $('#usernameInput').val(),
+        },
+        success: function(json){
             if ( json.status == 'fail' ) {
                 document.getElementById("errorUsername").innerHTML = "Username already in use !";
             }
@@ -122,13 +198,39 @@ function isUsernameExist() {
                 document.getElementById("errorUsername").innerHTML = "Username have to contains 3 to 20 characters !";
             }
         }
-    );
+    });
+}
+
+function normalize_project() {
+    $.ajaxSetup({
+        beforeSend : function(xhr) {
+            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}" );
+        }
+    });
+    $.ajax({
+        type: 'GET',
+        url: '/attributes/?format=json',
+        data: { 'project': $("#projectInput").val(),
+        },
+        success: function(json){
+            $("#projectInput").val(json.project);
+        }
+    });
 }
 
 function check_characters_name() {
-    $.getJSON( "/attributes/?format=json", { firstname: $('#firstnameInput').val(),
-                                             lastname: $('#lastnameInput').val()}).done(
-        function (json) {
+    $.ajaxSetup({
+        beforeSend : function(xhr) {
+            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}" );
+        }
+    });
+    $.ajax({
+        type: 'GET',
+        url: '/attributes/?format=json',
+        data: { 'firstname': $('#firstnameInput').val(),
+                'lastname': $('#lastnameInput').val(),
+        },
+        success: function(json){
             $('#firstnameInput').val(json.firstname);
             $('#lastnameInput').val(json.lastname);
             check_empty_fields();
@@ -139,12 +241,21 @@ function check_characters_name() {
                 document.getElementById("errorLastname").innerHTML = "Lastname can't be empty !";
             }
         }
-    );
+    });
 }
 
 function isMailExist() {
-    $.getJSON( "/attributes/?format=json", { mail: $('#emailInput').val() }).done(
-        function (json) {
+    $.ajaxSetup({
+        beforeSend : function(xhr) {
+            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}" );
+        }
+    });
+    $.ajax({
+        type: 'GET',
+        url: '/attributes/?format=json',
+        data: { 'mail': $('#emailInput').val(),
+        },
+        success: function(json){
             if ( json.status == 'fail' ) {
                 document.getElementById("errorEmail").innerHTML = "Email already in use !";
             }
@@ -152,7 +263,7 @@ function isMailExist() {
                 document.getElementById("errorEmail").innerHTML = '';
             }
         }
-    );
+    });
 }
 
 function hide_send_button() {
@@ -209,8 +320,17 @@ function hide_see_password() {
 }
 
 function check_password_constraints() {
-    $.getJSON( "/attributes/?format=json", { password: $('#passwordInput').val() }).done(
-        function(json) {
+    $.ajaxSetup({
+        beforeSend : function(xhr) {
+            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}" );
+        }
+    });
+    $.ajax({
+        type: 'GET',
+        url: '/attributes/?format=json',
+        data: { 'password': $('#passwordInput').val(),
+        },
+        success: function(json){
             if ( json.check == 'character' ) {
                document.getElementById("errorPassword").innerHTML = "Password have to contains at least 8 characters !";
             }
@@ -224,7 +344,7 @@ function check_password_constraints() {
                 document.getElementById("errorPassword").innerHTML = "Error";
             }
         }
-    );
+    });
 
     if ( $("#passwordInput").val() != $("#checkPasswordInput").val() ) {
             document.getElementById("errorCheckPassword").innerHTML = "Password aren't matching !";
@@ -336,12 +456,27 @@ function isValidEmailAddress(emailAddress) {
             </div>
         </div>
         <div class="form-group col-sm-10">
-            <label id="xDNLabel" class="control-label col-sm-2">X500 DN: </label>
+            <label id="xDNLabel" class="control-label col-sm-2">X500 DN (optional): </label>
             <div id="xDN" class="col-sm-3">
-                <input id="xDNInput" type="text" value="" class="form-control" placeholder="X500 DN" aria-describedby="basic-addon1">
+                <div class="input-group">
+                    <input id="xDNInput" type="text" value="" class="form-control" placeholder="X500 DN" aria-describedby="basic-addon1">
+                    <span class="input-group-addon input-group-addon-spec"><button type="button" id="dnIcon" title="Cert field info" data-toggle="popover" data-trigger="focus" data-placement="right" data-content="Your X500 DN Certificate have to be exact. You can add your certificate on your browser and this page will detect it automatically (if not look at your settings)." class="btn glyphicon glyphicon-info-sign"></button></span>
+                </div>
             </div>
             <div class="col-sm-5">
                 <p id="errorXDN" style="color:red"></p>
+            </div>
+        </div>
+        <div class="form-group col-sm-10">
+            <label id="projectLabel" class="control-label col-sm-2">Project (optional): </label>
+            <div id="project" class="col-sm-3">
+                <div class="input-group">
+                    <input id="projectInput" type="text" value="" class="form-control" placeholder="Project wished" aria-describedby="basic-addon1">
+                    <span class="input-group-addon input-group-addon-spec"><button type="button" id="projectIcon" title="Project field info" data-toggle="popover" data-trigger="focus" data-placement="right" data-content="You can put a name of a project if you know it (must be a name with letter and digit only; no accent no special character...)" class="btn glyphicon glyphicon-info-sign"></button></span>
+                </div>
+            </div>
+            <div class="col-sm-5">
+                <p id="errorProject" style="color:red"></p>
             </div>
         </div>
         <div class="form-group col-sm-10">
@@ -392,6 +527,10 @@ function isValidEmailAddress(emailAddress) {
             <input class="btn btn-primary col-sm-2" id="checkButton" value="Check Form" type="button">
             <div class="col-sm-3"></div>
             <input class="btn btn-primary col-sm-1" type="hidden" id="sendButton" value="Send" disabled="">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-3">
+                <p id="errorCreation" style="color:red"></p>
+            </div>
         </div>
         <div class="col-sm-10">
             </br>
