@@ -19,7 +19,8 @@ from registration import views
 from django.views.generic.base import RedirectView
 
 urlpatterns = [
-    url(r'^admin/', views.admin_dispatcher),
+    url(r'^admin/$', views.admin_dispatcher),
+    url(r'^admin/users', views.admin_users_dispatcher),
     url(r'^$', views.home_get_html),
     url(r'^/home$', views.home_get_html),
     url(r'^policies', views.policies_get_html),

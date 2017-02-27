@@ -167,11 +167,60 @@ def admin_dispatcher(request):
                 and request.GET['format'] == 'json':
                 return admin_get_json(request)
             else:
+                # if str(request.path) == '/admin/users/':
+                #     return users_get_html(request)
+                # else:
                 return admin_get_html(request)
         elif request.method == 'PUT':
             return admin_put_json(request)
         elif request.method == 'POST':
             return admin_post_json(request)
+    else:
+        return redirect('/')
+
+
+@login_required()
+def admin_users_dispatcher(request):
+    """
+
+    :param request:
+    :return:
+    """
+    if user_is_admin(request, spec='python')['admin'] != 'False':
+        ldap = OpenLdap(GLOBAL_CONFIG)
+        if request.method == 'GET':
+            if 'format' in request.GET\
+                    and 'spec' in request.GET\
+                    and request.GET['format'] == 'json'\
+                    and request.GET['spec'] == 'dataTable':
+                    data = {}
+                    data['users'] = {}
+                    list_users = []
+                    user = {}
+                    users = ldap.search_user(uid="foo", mail="bar")
+
+                    for each in users:
+                        user['uid'] = each[1]['uid'][0]
+                        user['mail'] = each[1]['mail'][0]
+                        list_users.append(user)
+                        user = {}
+                    data['users'] = list_users
+                    print list_users
+                    return JsonResponse(data)
+            else:
+                return users_get_html(request)
+        elif request.method == 'PUT':
+            info = {}
+            data = QueryDict(request.body).dict()
+            user = str(data['user'])
+            password = str(data['password'])
+            try:
+                attrs = ldap.change_user_password(user, password)
+                LOGGER.info("USER MODIFIED  :: Operator : %s :: admin changed %s password by '%s'", request.user, user, password)
+                return JsonResponse(attrs)
+            except:
+                info['info'] = 'Fail to change your password.'
+                return render(request, 'error_get_html.html', context=info)
     else:
         return redirect('/')
 
@@ -278,6 +327,14 @@ def admin_get_html(request):
     """
     if user_is_admin(request, spec='python')['admin'] != 'False':
         return render(request, "admin.html")
+    else:
+        return redirect('/')
+
+
+@login_required()
+def users_get_html(request):
+    if user_is_admin(request, spec='python')['admin'] != 'False':
+        return render(request, "users_get_html.html")
     else:
         return redirect('/')
 
