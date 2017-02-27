@@ -205,7 +205,6 @@ def admin_users_dispatcher(request):
                         list_users.append(user)
                         user = {}
                     data['users'] = list_users
-                    print list_users
                     return JsonResponse(data)
             else:
                 return users_get_html(request)
