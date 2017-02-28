@@ -164,21 +164,34 @@ function get_users() {
             dataSrc: function (json) {
                 $.each(json.users, function (index, value) {
                     value.icon = '<a style="color:blue;" href=\''+"javascript:changePasswordModal(\""+value["uid"]+"\");'><span class='glyphicon glyphicon-pencil'></span></a>";
+                    value.pager['state'] = value.pager['pager'];
+                    if ( value.pager['pager'] == '512' ) {
+                        value.pager['display'] = '<span style="color:green;" class="glyphicon glyphicon-ok"></span>';
+                        <!--value['action'] = '<a href="#" style="color:red;"><span class="glyphicon glyphicon-remove"></span></a>';-->
+                        value['action'] = '<a style="color:red;" href=\''+"javascript:changeState(\""+value["uid"]+"\", \"disable\");'><span class='glyphicon glyphicon-minus'></span></a>";
+                    }
+                    else {
+                        <!--value.pager['display'] = '<a href="#" style="color:red;"><span class="glyphicon glyphicon-remove"></span></a>';-->
+                        value['action'] = '<a style="color:green;" href=\''+"javascript:changeState(\""+value["uid"]+"\", \"enable\");'><span class='glyphicon glyphicon-plus'></span></a>";
+                    }
                 });
 
                 return json.users;
-            }
+            },
         },
         columns: [
             { data: 'icon'},
             { data: 'uid'},
             { data: 'mail'},
+            { data: 'pager',  render: { display: 'display', sort: 'state', filter: 'state' }},
+            { data: 'action' },
         ],
         order: [[ 0, 'desc' ]],
         iDisplayLength: 10,
         drawCallback: function (settings) {
             colorLine();
         },
+        stateSave: true,
         lengthMenu: [ [5, 10, 25, 50, -1], [5, 10, 25, 50, "ALL"] ],
     });
 }
@@ -207,7 +220,8 @@ function changePasswordModal(user) {
 }
 
 
-function changePassword(user) {
+
+function changeState(username, action) {
     $.ajaxSetup({
         beforeSend : function(xhr) {
             xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}" );
@@ -217,11 +231,11 @@ function changePassword(user) {
         url: location.pathname,
         type: 'PUT',
         data: { 'format': 'json',
-                'user': user,
-                'password': '',
+                'user': username,
+                'action': action,
         },
         success: function(json) {
-            $("#table_id").DataTable().ajax.reload();
+            $("#table_id").DataTable().ajax.reload(null, false);
         }
     });
 }
@@ -251,6 +265,12 @@ function changePassword(user) {
                             </th>
                             <th>
                                 Email
+                            </th>
+                            <th>
+                                State
+                            </th>
+                            <th>
+                                Change state
                             </th>
 
                         </tr>

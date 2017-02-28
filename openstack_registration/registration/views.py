@@ -197,11 +197,12 @@ def admin_users_dispatcher(request):
                     data['users'] = {}
                     list_users = []
                     user = {}
-                    users = ldap.search_user(uid="foo", mail="bar")
+                    users = ldap.search_user(uid="foo", mail="bar", pager="all")
 
                     for each in users:
                         user['uid'] = each[1]['uid'][0]
                         user['mail'] = each[1]['mail'][0]
+                        user['pager'] = { 'pager': each[1]['pager'][0], 'state': '', 'display': ''}
                         list_users.append(user)
                         user = {}
                     data['users'] = list_users
@@ -212,14 +213,25 @@ def admin_users_dispatcher(request):
             info = {}
             data = QueryDict(request.body).dict()
             user = str(data['user'])
-            password = str(data['password'])
-            try:
-                attrs = ldap.change_user_password(user, password)
-                LOGGER.info("USER MODIFIED  :: Operator : %s :: admin changed %s password by '%s'", request.user, user, password)
-                return JsonResponse(attrs)
-            except:
-                info['info'] = 'Fail to change your password.'
-                return render(request, 'error_get_html.html', context=info)
+
+            if 'password' in data:
+                password = str(data['password'])
+                try:
+                    attrs = ldap.change_user_password(user, password)
+                    LOGGER.info("USER MODIFIED  :: Operator : %s  :: admin changed %s password by '%s'", request.user, user, password)
+                    return JsonResponse(attrs)
+                except:
+                    info['info'] = 'Fail to change your password.'
+                    return render(request, 'error_get_html.html', context=info)
+            elif 'action' in data:
+                action = str(data['action'])
+                try:
+                    attrs = ldap.modify_user(user, action)
+                    LOGGER.info("USER MODIFIED  :: Operator : %s  :: username=%s password action=%s", request.user, user, action)
+                    return JsonResponse(attrs)
+                except:
+                    info['info'] = 'Fail to ' + action +' user ' + user +'.'
+                    return render(request, 'error_get_html.html', context=info)
     else:
         return redirect('/')
 
