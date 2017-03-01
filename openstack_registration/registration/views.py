@@ -454,6 +454,7 @@ def login(request):
                 return HttpResponseRedirect(redirect_page)
             else:
                 info['info'] = 'Your login/password are wrong'
+                LOGGER.info("LOGIN FAILED   :: Attempt to login with user '%s' from %s", request.POST['username'], request.META.get('REMOTE_ADDR'))
                 return render(request, "login.html", context=info)
         else:
             return render(request, "login.html")
