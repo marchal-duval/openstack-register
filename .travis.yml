@@ -1,0 +1,10 @@
+language: java
+jdk: oraclejdk8
+
+addons:
+  sonarqube:
+    organization: "lal"
+    token:
+      secure: "pUpLyY7Elj4WLIJX9dMhZMoPrp4cIbtbtWxpV22VRCBuz+R8Y1YaDcDYufvHZBf2TXfc7CZhrpwqmwcNTI0xNvaWUORAdAyPzsycbtqKRhGLrYQWaoXTGRYdaO2zZCU8MliNJdNNS9V+JEcVwcoH1+rePf7UMXIqB6fgNZJyQ4Y5P4fLkG2uaoyoM5Kf+vHErKOI8WPWGYZ6PV8QVofsxObM1E5Ww9+A0cjLz1p8FZYW0aVq6Y7rdmWnUjkUcfrIIwUrgLBg2lj/bpXggsDCXNQt5G3/1NXzyFXnk1w7PYyrnDhGaqUYnJTaEhJQulrXvToxzQYOY2N0K2Xmi/tweMyL0id/0bOKTh9AVyLKNx8Pi+Img4Syyhjh0z2y8jlwMtGeNgsOtmbyhzvdP9NHS982Smu9mKM973qI5eKm3a08V4B+rZAlVvw8uSW5keBT3fqZKDvoO2BtcNhkGygi+WV8cxzN0tlFayx2hiZb/fBgMMfOyEnJ7hB98bbqcptCI57uXep0DAqQBCTumEMyHGDuq2bM3x/BP/QcDiuUlVbSmbuLowkYekYyFSM/WRZ3EAAeNd9UN1QYni7Bu6IXvWm2qDCbGLlEhQ3PEr8hQ8dj0Tf1sclBwPlMV6V8F5G1Helu1QtXFn4yDm5jU89ylIwJGJrTs7JqSPTYL3UiXOU="
+script:
+  - sonar-scanner
