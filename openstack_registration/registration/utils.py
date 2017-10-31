@@ -213,7 +213,7 @@ def send_mail(username,
     if action == 'add':
         all_rcpt = user_email
         random_string = uuid.uuid4()
-        link = "http://134.158.76.228:8000/action/{}".format(random_string)
+        link = "https://registration.lal.in2p3.fr/action/{}".format(random_string)
         message = "Dear {} {}, \n\nYou just created an account on OpenStack@lal.\n" \
                   "Please follow the link to activate your account: \n{}\n\n" \
                   "You can have access to your profile on the registration " \

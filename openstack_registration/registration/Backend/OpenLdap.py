@@ -159,7 +159,13 @@ class OpenLdap(PrototypeBackend):
                     uid=None,
                     mail=None,
                     attributes=None,
-                    password=None):
+                    password=None,
+                    pager=None):
+        if uid is not None and mail is not None and pager is not None:
+             return self.connection.search_s(self.base_ou,
+                                            ldap.SCOPE_SUBTREE,
+                                            "(&(objectClass=person)(uid=*))",
+                                             ['uid', 'mail', 'pager'])
         if uid is not None and mail is not None:
              return self.connection.search_s(self.base_ou,
                                             ldap.SCOPE_SUBTREE,
@@ -203,6 +209,25 @@ class OpenLdap(PrototypeBackend):
                                         "(&(objectClass=groupOfUniqueNames)(cn={}))"
                                         .format(uid),
                                         ['uniqueMember', 'cn', 'description'])
+
+    def modify_user(self,
+                    uid,
+                    action):
+        attrs = {}
+        if action == 'enable':
+            pager = "512"
+        else:
+            pager = "514"
+        user_attributes = self.search_user(attributes=uid)
+        dn_user = str(user_attributes[0][0])
+
+        update_attrs = [(ldap.MOD_REPLACE, 'pager', pager)]
+        try:
+            self.connection.modify_s(dn_user, update_attrs)
+            attrs['status'] = 'success'
+        except:
+            attrs['status'] = 'fail'
+        return attrs
 
     def enable_user(self,
                     uuid):
