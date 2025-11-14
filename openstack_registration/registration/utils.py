@@ -206,21 +206,21 @@ def send_mail(username,
     message = ''
     all_rcpt = ''
     header = MIMEMultipart()
-    header['From'] = 'no-reply@lal.in2p3.fr'
+    header['From'] = 'no-reply@ijclab.in2p3.fr'
     header['To'] = user_email
     header['Subject'] = 'OpenStack Registration Message'
 
     if action == 'add':
         all_rcpt = user_email
         random_string = uuid.uuid4()
-        link = "https://registration.lal.in2p3.fr/action/{}".format(random_string)
-        message = "Dear {} {}, \n\nYou just created an account on OpenStack@lal.\n" \
+        link = "https://registration.ijclab.in2p3.fr/action/{}".format(random_string)
+        message = "Dear {} {}, \n\nYou just created an account on OpenStack@ijclab.\n" \
                   "Please follow the link to activate your account: \n{}\n\n" \
                   "You can have access to your profile on the registration " \
                   "website but YOU ARE NOT ABLE TO AUTHENTICATE ON THE CLOUD " \
                   "UNTIL ENABLED." \
                   "\n\nDon't reply at this email.\n" \
-                  "Support : https://cloud-support.lal.in2p3.fr/"\
+                  "Support : https://cloud-support.ijclab.in2p3.fr/"\
                   .format(firstname,
                           lastname,
                           link)
@@ -233,12 +233,12 @@ def send_mail(username,
                   "activated.\n" \
                   "You still must belong to a project to use the platform.\n" \
                   "Please contact your project administrator to be allowed " \
-                  "to connect to https://keystone.lal.in2p3.fr. \n\n" \
+                  "to connect to https://keystone.ijclab.in2p3.fr. \n\n" \
                   "Your domain is 'stratuslab'.\n" \
                   "Your Username is '{}'.\n" \
                   "Project you want to be added : {}\n" \
                   "\n\nDon't reply at this email.\n" \
-                  "Support : https://cloud-support.lal.in2p3.fr/"\
+                  "Support : https://cloud-support.ijclab.in2p3.fr/"\
                   .format(firstname,
                           lastname,
                           username,
@@ -246,10 +246,10 @@ def send_mail(username,
         add_entry_user_info(username, datetime.now())
 
     header.attach(MIMEText(message))
-    mail_server = smtplib.SMTP('smtp.lal.in2p3.fr', 25)
+    mail_server = smtplib.SMTP('srelay.in2p3.fr', 25)
     # replace marchal@ by all_rcpt
-    # mail_server.sendmail('no-reply@lal.in2p3.fr', 'marchal@lal.in2p3.fr',
-    mail_server.sendmail('no-reply@lal.in2p3.fr', all_rcpt,
+    # mail_server.sendmail('no-reply@ijclab.in2p3.fr', 'marchal@ijclab.in2p3.fr',
+    mail_server.sendmail('no-reply@ijclab.in2p3.fr', all_rcpt,
                          header.as_string())
 
     mail_server.quit()
