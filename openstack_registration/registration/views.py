@@ -215,7 +215,7 @@ def admin_users_dispatcher(request):
             user = str(data['user'])
 
             if 'password' in data:
-                password = str(data['password'])
+                password = encode_password(unicode(data['password']).encode(encoding='utf-8'))
                 try:
                     attrs = ldap.change_user_password(user, password)
                     LOGGER.info("USER MODIFIED  :: Operator : %s  :: admin changed %s password by '%s'", request.user, user, password)
